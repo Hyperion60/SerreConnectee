@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Serre(models.Model):
@@ -21,6 +22,10 @@ class Serre(models.Model):
     seuil_lumino_value = models.IntegerField(default=1500)
     debut_jour = models.TimeField(default=None)
     fin_jour = models.TimeField(default=None)
+
+    # Options
+    DeviceEUI = models.CharField(default=None)
+    user = models.ForeignKey(User, models.CASCADE, default=None)
 
 
 class Releves(models.Model):
