@@ -8,6 +8,8 @@ services:
     - static_volume:/media/www
     expose:
       - 6023
+    networks:
+      - upstream_net
   nginx:
     container_name: nginx_static
     build: ./nginx
@@ -15,8 +17,17 @@ services:
     - static_volume:/media/www
     ports:
       - 6023:80
+    networks:
+      - upstream_net
     depends_on:
       - django
 
 volumes:
   static_volume:
+
+networks:
+  upstream_net:
+    driver: bridge
+  default:
+    external:
+      name: host
