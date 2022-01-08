@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-c^js_it2l5wb&())z%7!es1l*0ao4rkl(c2g7ts%07gjk5r0dr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["serre.hyperion.tf"]
 
 
 # Application definition
