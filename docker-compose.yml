@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+  django:
+    build: .
+    volumes:
+    - .:/home/SerreConnectee
+    - static_volume:/media/www
+    expose:
+      - 6023
+  nginx:
+    container_name: nginx_static
+    image: nginx:alpine
+    volumes:
+    - ./nginx/nginx.conf:/etc/nginx/
+    - static_volume:/media/www
+    ports:
+      - 6023:80
+    depends_on:
+      - django
+
+volumes:
+  static_volume:
