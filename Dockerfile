@@ -11,11 +11,12 @@ RUN apk update \
 RUN pip install --upgrade pip \
     && pip install -r /requirements.txt
 
-COPY . /home
-WORKDIR /home
+COPY . /home/django
+WORKDIR /home/django
 
-RUN chmod +x /home/SerreConnectee/entrypoint.sh
+COPY ./entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 6023
 
-ENTRYPOINT ["/home/SerreConnectee/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
