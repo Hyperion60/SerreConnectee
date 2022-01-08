@@ -4,13 +4,17 @@ from django.db import models
 class Serre(models.Model):
     name = models.CharField(unique=True, default="New serre")
     type_culture = models.CharField(default="Cannabis")
+    # Authentification
+    otp = models.IntegerField(unique=True, default="00000")
 
+    # Actionneurs
     chauffage = models.BooleanField(default=False)
     ventilo = models.BooleanField(default=False)
     arrosage = models.BooleanField(default=False)
     lumiere = models.BooleanField(default=False)
     trappe_open = models.BooleanField(default=False)
 
+    # Seuils
     seuil_temp = models.FloatField(default=20)
     seuil_air_humid = models.FloatField(default=20)
     seuil_sol_humid = models.FloatField(default=50)
