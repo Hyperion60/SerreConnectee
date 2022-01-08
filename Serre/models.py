@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 
 
 class Serre(models.Model):
-    name = models.CharField(unique=True, default="New serre")
-    type_culture = models.CharField(default="Cannabis")
+    name = models.CharField(unique=True, default="New serre", max_length=250)
+    type_culture = models.CharField(default="Cannabis", max_length=250)
     # Authentification
     otp = models.IntegerField(unique=True, default="00000")
 
@@ -24,7 +24,7 @@ class Serre(models.Model):
     fin_jour = models.TimeField(default=None)
 
     # Options
-    DeviceEUI = models.CharField(default=None)
+    DeviceEUI = models.CharField(default=None, max_length=16)
     user = models.ForeignKey(User, models.CASCADE, default=None)
 
 
