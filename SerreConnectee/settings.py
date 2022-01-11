@@ -71,7 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'SerreConnectee.wsgi.application'
 
-STATICFILES_DIRS = (BASE_DIR / "templates/static",)
+STATICFILES_DIRS = (BASE_DIR / "static",)
 
 
 # Database
@@ -123,7 +123,7 @@ STATIC_URL = 'static/'
 
 MEDIA_URL = 'media/'
 
-STATIC_ROOT = 'media/www/'
+STATIC_ROOT = '/media/www/'
 
 
 # Default primary key field type
