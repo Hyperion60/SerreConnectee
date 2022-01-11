@@ -16,6 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+import SerreUser.views
+from SerreConnectee import views
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('about/', views.about, name="about"),
+    path('admin/', admin.site.urls, name="admin"),
+    path('login/', SerreUser.views.login, name="login"),
 ]
