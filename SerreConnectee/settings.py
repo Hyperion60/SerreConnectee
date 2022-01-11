@@ -56,8 +56,7 @@ ROOT_URLCONF = 'SerreConnectee.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -71,6 +70,10 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SerreConnectee.wsgi.application'
+
+STATICFILES_DIRS = [
+    [BASE_DIR / "templates/static"],
+]
 
 
 # Database
@@ -86,6 +89,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
+
+AUTH_USER_MODEL = "SerreUser.SerreUser"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -120,7 +125,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = 'static/'
+
 STATIC_ROOT = '/media/www/'
+
+MEDIA_ROOT = '/media/www/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
