@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -11,6 +11,11 @@ def about(request):
 
 def index(request):
     return render(request, "index.html")
+
+
+def logout_user(request):
+    logout(request)
+    return redirect("/")
 
 
 def login_user(request):
