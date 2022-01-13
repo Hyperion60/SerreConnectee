@@ -48,3 +48,13 @@ def login_user(request):
             return redirect(context['next'])
 
     return render(request, "User/login.html", context)
+
+
+def signup_user(request):
+    context = {
+        'next': request.GET.get('next', '/'),
+        'errors': [],
+        'restricted': True,
+    }
+
+    return render(request, "User/signup.html", context)

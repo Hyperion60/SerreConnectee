@@ -1,4 +1,75 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>S'enregistrer</h1>
+    <div class="container">
+        <div class="row">
+            <div class="mb-5"></div>
+        </div>
+        <div class="row justify-content-md-center">
+            <div class="mb-5"></div>
+            <div class="mb-3">
+                <h1>Se créer un compte</h1>
+            </div>
+        </div>
+        {% if errors %}
+        <div class="row justify-content-center">
+            <div class="mb-5"></div>
+            <div class="card text-white bg-danger mb-3" style="max-width: 18rem; min-width: 50%;">
+                <div class="card-body">
+                    <h5 class="card-title">Erreurs</h5>
+                    <p class="card-text">
+                        {% for error in errors %}
+                        - {{ error }}
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <form method="post" action="/signup/?next={{ next }}">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                <div class="mb-3" style="min-width: 50%;">
+                    <label for="username-input" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" class="form-control" id="username-input" name="username" placeholder="Votre pseudo" required>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="mb-3" style="min-width: 50%;">
+                    <label for="email-input" class="form-label">Adresse e-mail</label>
+                    <input type="email" class="form-control" id="email-input" name="email" placeholder="serre@exemple.fr" required>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="mb-3" style="min-width: 50%;">
+                    <label for="password1-input" class="form-label">Mot de passe</label>
+                    <input type="password" class="form-control" id="password1-input" name="password1" required>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="mb-3" style="min-width: 50%;">
+                    <label for="password2-input" class="form-label">Confirmation du mot de passe</label>
+                    <input type="password" class="form-control" id="password2-input" name="password2" required>
+                    <div class="invalid-feedback disabled" id="verify-password">Les mots de passes de correspondent pas</div>
+                </div>
+            </div>
+            <div class="mb-5"></div>
+            <div class="row justify-content-md-center">
+                <button class="btn btn-primary" type="submit">Créer un compte</button>
+            </div>
+            <div class="mb-5"></div>
+        </form>
+    </div>
+{% endblock %}
+{% block script %}
+function matchPassword() {
+    var psw1 = document.getElementById("password1-input").value;
+    var psw2 = document.getElementById("password2-input").value;
+    var balise = document.getElementById("verify-password");
+
+    if (psw1 != "" && psw2 != "" && psw1 != psw2) {
+        balise.classList.remove("d-none");
+    } else {
+        balise.classList.add("d-none");
+    }
+}
 {% endblock %}
