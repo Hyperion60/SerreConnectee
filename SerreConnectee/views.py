@@ -1,13 +1,35 @@
 from django.contrib.auth import authenticate, logout
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+from django.template.loader import render_to_string
 from django.utils.datastructures import MultiValueDictKeyError
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
+from SerreConnectee.tokens import account_activation_token
+from SerreConnectee.settings import EMAIL_HOST_USER
 
 
-def check_email(context, email):
+def __check_email(context, email):
     if not '@' in email or ';' in email:
         context['errors'].append("Format d'email invalide")
+
+
+def __send_verification_email(request, user):
+    mail_subject = "Activation du compte pour le site Serre Connectée"
+    current_site = get_current_site(request)
+    mail_message = render_to_string('User/email/activate_email.html',
+        {
+            'user': user,
+            'domain': current_site,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user=user)
+        }
+    )
+    send_mail(mail_subject, mail_message, EMAIL_HOST_USER, [user.email], fail_silently=False)
 
 
 def about(request):
@@ -65,7 +87,7 @@ def signup_user(request):
     if request.POST:
         try:
             context['username'] = request.POST['username']
-            check_email(context, request.POST['email'])
+            __check_email(context, request.POST['email'])
             if len(User.objects.filter(email__exact=request.POST['email'])):
                 context['errors'].append("L'adresse e-mail est déjà utilisée")
             if not len(context['errors']):
@@ -83,6 +105,33 @@ def signup_user(request):
                             is_active=False)
             new_user.set_password(context['password'])
             new_user.save()
+            __send_verification_email(request, new_user)
+            context['restricted'] = None
             context['message'] = "Un lien de validation a été envoyé à votre adresse email pour l'activation du compte"
             return render(request, "index.html", context)
     return render(request, "User/signup.html", context)
+
+
+def activate_account(request, uidb64, token):
+    context = {
+        'errors': [],
+    }
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None:
+        if account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            login(request, user)
+            context['message'] = "Votre compte a été validé avec succès !"
+        else:
+            if user.is_active:
+                context['errors'].append("Votre compte a déjà été activé !")
+    else:
+        context['errors'].append("Le lien est invalide, veuillez contacter un administrateur")
+
+    return render(request, "index.html", context)

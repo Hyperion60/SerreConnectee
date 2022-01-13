@@ -9,12 +9,15 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+# from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment file into development environment
+# load_dotenv(BASE_DIR / "deploiements/secret.env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -130,3 +133,18 @@ STATIC_ROOT = '/media/www/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Email settings
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = os.getenv("EMAIL_HOST_OVH")
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER_OVH")
+
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASS_OVH")
+
+EMAIL_PORT = os.getenv("EMAIL_PORT_OVH")
+
+EMAIL_USE_SSL = bool(int(os.getenv("EMAIL_SSL_OVH")))
