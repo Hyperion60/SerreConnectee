@@ -33,10 +33,11 @@ def login_user(request):
         try:
             username = request.POST['username']
             password = request.POST['password']
-            User.objects.get(username__exact=username)
-            user = authenticate(username=username, password=password)
+            user = User.objects.get(username__exact=username)
             if not user.check_password(password):
                 context['errors'].append("Mot de passe invalide")
+            else:
+                user = authenticate(username=username, password=password)
         except MultiValueDictKeyError:
             context['errors'].append("Champ(s) manquant(s)")
         except User.DoesNotExist:
