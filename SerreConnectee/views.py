@@ -5,6 +5,11 @@ from django.contrib.auth.models import User
 from django.utils.datastructures import MultiValueDictKeyError
 
 
+def check_email(context, email):
+    if not '@' in email or ';' in email:
+        context['errors'].append("Format d'email invalide")
+
+
 def about(request):
     return render(request, "about.html")
 
@@ -57,4 +62,27 @@ def signup_user(request):
         'restricted': True,
     }
 
+    if request.POST:
+        try:
+            context['username'] = request.POST['username']
+            check_email(context, request.POST['email'])
+            if len(User.objects.filter(email__exact=request.POST['email'])):
+                context['errors'].append("L'adresse e-mail est déjà utilisée")
+            if not len(context['errors']):
+                context['email'] = request.POST['email']
+                if request.POST['password1'] != request.POST['password2']:
+                    context['errors'].append("Les mots de passe ne correspondent pas.")
+                else:
+                    context['password'] = request.POST['password1']
+        except MultiValueDictKeyError:
+            context['errors'].append("Champ(s) manquant(s)")
+
+        if not len(context['errors']):
+            new_user = User(username=context['username'],
+                            email=context['email'],
+                            is_active=False)
+            new_user.set_password(context['password'])
+            new_user.save()
+            context['message'] = "Un lien de validation a été envoyé à votre adresse email pour l'activation du compte"
+            return render(request, "index.html", context)
     return render(request, "User/signup.html", context)
