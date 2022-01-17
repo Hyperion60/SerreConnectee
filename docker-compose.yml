@@ -10,6 +10,8 @@ services:
       - 6023
     networks:
       - upstream_net
+    secrets:
+      - email_password
   nginx:
     container_name: nginx_static
     build: ./nginx
@@ -31,3 +33,7 @@ networks:
   default:
     external:
       name: host
+      
+secrets:
+  email_password:
+    file: /home/secrets/email_ovh.env
