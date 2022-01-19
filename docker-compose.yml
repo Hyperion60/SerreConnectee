@@ -9,7 +9,7 @@ services:
     environment:
       - PRODUCTION=1
     env_file:
-      - /home/secret/email_ovh.env
+      - /home/hyperion/secret/email_ovh.env
     expose:
       - 6023
     networks:
