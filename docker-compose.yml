@@ -36,4 +36,4 @@ networks:
       
 secrets:
   email_password:
-    file: /home/secrets/email_ovh.env
+    file: /home/hyperion/secret/email_ovh.env
