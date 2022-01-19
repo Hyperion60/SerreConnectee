@@ -46,13 +46,13 @@
                     {% if restricted is None %}
                     {% if not user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">
+                        <a class="nav-link" href="{% url 'login' %}?next={{ request.path }}">
                             <i class="fa fa-sign-in"></i>
                             Se connecter
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="{% url 'signup' %}?next={{ request.path }}">
                             <i class="fa fa-user-plus"></i>
                             S'enregistrer
                         </a>
@@ -64,14 +64,14 @@
                             Mon compte
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Détails</a>
+                            <a class="dropdown-item" href="{% url 'detail' %}">Détails</a>
                             <a class="dropdown-item" href="#">Option</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" style="color: red;" href="#">Supprimer le compte</a>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">
+                        <a class="nav-link" href="{% url 'logout' %}?next={{ request.path }}">
                             <i class="fa fa-sign-out"></i>
                             Se déconnecter
                         </a>
