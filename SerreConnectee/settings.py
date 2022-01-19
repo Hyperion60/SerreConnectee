@@ -17,7 +17,8 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment file into development environment
-load_dotenv(BASE_DIR / "deploiements/secret.env")
+if not os.getenv("PRODUCTION"):
+    load_dotenv(BASE_DIR / "deploiements/secret.env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/

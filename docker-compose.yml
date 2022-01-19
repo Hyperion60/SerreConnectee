@@ -6,6 +6,10 @@ services:
     volumes:
     - .:/home/django
     - static_volume:/media/www
+    environment:
+      - PRODUCTION=1
+    env_file:
+      - /home/secret/email_ovh.env
     expose:
       - 6023
     networks:
