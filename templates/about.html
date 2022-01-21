@@ -38,7 +38,7 @@ h3 {
 	margin-bottom: 30px;
 }
 
-button {
+#retour {
 	border: none;
 	outline: none;
 	padding: 10px 20px;
@@ -47,9 +47,7 @@ button {
 	background: #fff;
 	margin-bottom: 50px;
 	box-shadow: 0 3px 20px 0 #0000003b;
-}
-button:hover {
-	cursor: pointer;
+    text-shadow: none;
 }
 
 img {
@@ -57,37 +55,20 @@ img {
     height: auto;
     display: block;
 }
-
-
 {% endblock %}
+
 {% block content %}
-
 <div class="container">
-<div class="overlay">
-<h1>Serre connectée</h1>
-<h3>Nourriture et satisfaction à portée de main</h3>
-<p>Une serre connectée et innovante crée à Unilasalle.
-     <br>
-     <br>
-	<img src="/static/serre/images/schemafonctionnel.jpeg" alt="> Ici devait s'afficher le schéma fonctionnel, rechargez la page... <">
-    <br>
-     <br>
-    Équipe : <i> Rémi Maubanc et Julien Blot </i>
-    <br>
-    Accompagnement : <i> Jean Nguyen-Cadoret </i>   </p>
-
-
-	<form action="http://127.0.0.1:8000/">  <!-- http://serre.hyperion.tf/about/  -->
-	<button>Retour à l'accueil</button>
-	</form>
-
-</div>
-
-
-
-
-        <script src="serre/js/jquery.min.js"></script>
-        <script src="serre/js/bootstrap.min.js"></script>
-
+    <div class="overlay">
+        <h1>Serre connectée</h1>
+        <h3>Nourriture et satisfaction à portée de main</h3>
+        <p>Une serre connectée et innovante crée à Unilasalle.<br><br>
+            <img src="/static/serre/images/schemafonctionnel.jpeg" alt="> Ici devait s'afficher le schéma fonctionnel, rechargez la page... <">
+            <br><br>
+            Équipe : <i>Rémi Maubanc et Julien Blot</i><br> <!-- note : normalement préférable de préciser le style CSS-->
+            Accompagnement : <i> Jean Nguyen-Cadoret </i>
+        </p>
+        <a class="btn btn-primary" id="retour" href="/" role="button">Retour à l'accueil</a>
+    </div>
 </div>
 {% endblock %}
