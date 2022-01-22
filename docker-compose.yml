@@ -9,11 +9,13 @@ services:
     environment:
       - PRODUCTION=1
     env_file:
-      - /home/secret/email_ovh.env
+      - /home/hyperion/secret/email_ovh.env
     expose:
       - 6023
     networks:
       - upstream_net
+    secrets:
+      - email_password
   nginx:
     container_name: nginx_static
     build: ./nginx
@@ -35,3 +37,7 @@ networks:
   default:
     external:
       name: host
+      
+secrets:
+  email_password:
+    file: /home/hyperion/secret/email_ovh.env

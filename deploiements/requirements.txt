@@ -3,3 +3,4 @@ django-extensions == 2.2.*
 uWSGI == 2.0.*
 simple-otp==0.1.*
 six == 1.16.*
+python-dotenv==0.19.*

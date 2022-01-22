@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, logout
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -8,6 +9,7 @@ from django.template.loader import render_to_string
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.views.decorators.csrf import csrf_exempt
 
 from SerreConnectee.tokens import account_activation_token
 from SerreConnectee.settings import EMAIL_HOST_USER
@@ -135,3 +137,12 @@ def activate_account(request, uidb64, token):
         context['errors'].append("Le lien est invalide, veuillez contacter un administrateur")
 
     return render(request, "index.html", context)
+
+
+@csrf_exempt
+def test_arduino(request):
+    if request.POST:
+        print(request)
+        print(request.POST.content)
+    print(request.body.decode())
+    return HttpResponse("OK")
