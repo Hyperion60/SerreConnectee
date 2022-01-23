@@ -156,6 +156,7 @@ def activate_account(request, uidb64, token):
 def recover_password(request):
     context = {
         'errors': [],
+        'restricted': True,
     }
     if request.POST:
         try:
@@ -175,6 +176,8 @@ def recover_password(request):
 def modify_password(request, uidb64, token):
     context = {
         'errors': [],
+        'token': token,
+        'uidb64': uidb64,
     }
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -184,13 +187,19 @@ def modify_password(request, uidb64, token):
 
     if user is not None:
         if request.POST:
+            print("POST")
             if account_activation_token.check_token(user, token):
+                print("Activation")
                 try:
                     password = request.POST['password']
                     password2 = request.POST['password2']
+                    print("Password")
                     if password2 == password:
+                        print("Save")
                         user.set_password(password)
                         user.save()
+                        context['message'] = "Mot de passe modifié avec succès"
+                        return render(request, "index.html", context)
                     else:
                         context['errors'].append("Les mots de passes ne correspondent pas")
                 except MultiValueDictKeyError:
@@ -199,6 +208,8 @@ def modify_password(request, uidb64, token):
                 context['errors'].append("Le lien est invalide, veuillez recommencer la procédure")
     else:
         context['errors'].append("Le lien est invalide, veuillez recommencer la procédure")
+    print(context)
+    print(user)
 
     return render(request, "User/after-password.html", context)
 
