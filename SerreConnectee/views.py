@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -53,6 +54,11 @@ def about(request):
 
 
 def index(request):
+    if request.GET.get('code', '') == '1':
+        context = {
+            'message': "Mot de passe modifié avec succès"
+        }
+        return render(request, "index.html", context)
     return render(request, "index.html")
 
 
@@ -187,19 +193,14 @@ def modify_password(request, uidb64, token):
 
     if user is not None:
         if request.POST:
-            print("POST")
             if account_activation_token.check_token(user, token):
-                print("Activation")
                 try:
                     password = request.POST['password']
                     password2 = request.POST['password2']
-                    print("Password")
                     if password2 == password:
-                        print("Save")
                         user.set_password(password)
                         user.save()
-                        context['message'] = "Mot de passe modifié avec succès"
-                        return render(request, "index.html", context)
+                        return redirect("/?code=1")
                     else:
                         context['errors'].append("Les mots de passes ne correspondent pas")
                 except MultiValueDictKeyError:
@@ -208,8 +209,6 @@ def modify_password(request, uidb64, token):
                 context['errors'].append("Le lien est invalide, veuillez recommencer la procédure")
     else:
         context['errors'].append("Le lien est invalide, veuillez recommencer la procédure")
-    print(context)
-    print(user)
 
     return render(request, "User/after-password.html", context)
 
