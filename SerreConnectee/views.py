@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.http import HttpResponse
@@ -6,12 +7,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 
+from Serre.models import Serre
 from SerreConnectee.tokens import account_activation_token
 from SerreConnectee.settings import EMAIL_HOST_USER
 
@@ -211,6 +212,35 @@ def modify_password(request, uidb64, token):
         context['errors'].append("Le lien est invalide, veuillez recommencer la procédure")
 
     return render(request, "User/after-password.html", context)
+
+
+@login_required(login_url="/login/")
+def user_detail(request):
+    context = {
+        'errors': [],
+        'user': request.user,
+        'date_joined': request.user.date_joined.replace(microsecond=0)
+    }
+    if request.POST:
+        try:
+            old_pass = request.POST['old-password']
+            new_pass = request.POST['new-password']
+            new_pass1 = request.POST['new-password1']
+            if request.user.check_password(old_pass) and new_pass == new_pass1:
+                request.user.set_password(new_pass)
+                request.user.save()
+                context['message'] = "Mot de passe modifié avec succès"
+            else:
+                if new_pass != new_pass1:
+                    context['errors'].append("Les nouveaux mots de passes ne correspondent pas")
+                else:
+                    context['errors'].append("L'ancien mot de passe est invalide")
+        except MultiValueDictKeyError:
+            context['errors'].append("Un ou plusieurs champs sont manquants")
+
+    # context['serres'] = Serre.objects.filter(user=request.user)
+    # context['serre_len'] = len(context['serres'])
+    return render(request, "User/detail.html", context)
 
 
 @csrf_exempt

@@ -1,8 +1,138 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="container">
-        <div class="row">
-            test
+<div class="container">
+    <div class="row">
+        <div class="mb-5"></div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="mb-5"></div>
+        <div class="mb-3">
+            <h1 style="text-align: center;">Mes informations</h1>
         </div>
     </div>
+    {% if errors %}
+        <div class="row justify-content-center">
+            <div class="mb-5"></div>
+            <div class="card text-white bg-danger mb-3" style="max-width: 18rem; min-width: 50%;">
+                <div class="card-body">
+                    <h5 class="card-title">Erreurs</h5>
+                    <p class="card-text">
+                        {% for error in errors %}
+                        - {{ error }}
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if message %}
+        <div class="row justify-content-center">
+            <div class="mb-5"></div>
+            <div class="card text-black bg-success mb-3" style="max-width: 18rem; min-width: 50%;">
+                <div class="card-body">
+                    <p class="card-text">
+                        {{ message }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8">
+            <hr class="my-3">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Nom d'utilisateur</th>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Adresse e-mail</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date de la création du compte</th>
+                        <td>{{ date_joined|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mb-5"></div>
+            <hr class="my-3">
+            <form method="post" action="/detail/">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md">
+                        <p class="fw-bold">Changement du mot de passe</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <label for="password1-input" class="visually-hidden">Ancien mot de passe</label>
+                        <input id="password1-input" type="password" class="form-control" name="old-password" placeholder="Ancien mot de passe">
+                    </div>
+                    <div class="col-md">
+                        <label for="password2-input" class="visually-hidden">Nouveau mot de passe</label>
+                        <input id="password2-input" type="password" class="form-control" name="new-password" placeholder="Nouveau mot de passe">
+                    </div>
+                    <div class="col-md">
+                        <label for="password3-input" class="visually-hidden">Répetez nouveau mot de passe</label>
+                        <input id="password3-input" type="password" class="form-control" name="new-password1" placeholder="Répétez mot de passe">
+                    </div>
+                    <div class="col-md">
+                        <button class="btn btn-primary" type="submit">Changer</button>
+                    </div>
+                </div>
+            </form>
+            <div class="mb-5"></div>
+        </div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="mb-5"></div>
+        <div class="mb-3">
+            <h1 style="text-align: center;">Mes serres</h1>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="accordion" id="SerreList">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="Serre1">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Serre n°1 - Ma Serre
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="Serre1" data-bs-parent="#SerreList">
+                    <div class="accordion-body">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Type de culture</th>
+                                    <td>Cannabis</td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td style="color: darkred;">Hors ligne</td>
+                                </tr>
+                                <tr>
+                                    <th>Date du dernier relevé</th>
+                                    <td>Jamais</td>
+                                </tr>
+                                <tr>
+                                    <th>Jetons d'authentification</th>
+                                    <td class="token">jdslkfqjkdjfk</td>
+                                    <td><input class="btn btn-primary btn-success ajax-gen" id="1" type="submit" value="Générer"></td>
+                                    <!--<td><button class="btn btn-primary" type="submit" id="ajax-gen">Générer</button></td>-->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-5"></div>
+
+</div>
+{% endblock %}
+{% block script %}
+
 {% endblock %}

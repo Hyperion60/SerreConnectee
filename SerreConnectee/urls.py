@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 
 from SerreConnectee import views, account
+import Serre
 
 urlpatterns = [
     path('', views.index, name="index"),
@@ -25,6 +26,7 @@ urlpatterns = [
     re_path(r'^activate/(?P<uidb64>[0-9A-Za-z_\-\']+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/$',
             views.activate_account, name="activate"),
     path('admin/', admin.site.urls, name="admin"),
+    path('detail/', views.user_detail, name="detail"),
     path('login/', views.login_user, name="login"),
     path('logout/', views.logout_user, name="logout"),
     re_path(r'^modify/(?P<uidb64>[0-9A-Za-z_\-\']+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,32})/$',
@@ -32,4 +34,5 @@ urlpatterns = [
     path('recover/', views.recover_password, name="recover-password"),
     path('signup/', views.signup_user, name="signup"),
     path('test/', views.test_arduino),
+    path('serre/get/token/', Serre.views)
 ]
