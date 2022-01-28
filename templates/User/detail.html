@@ -84,6 +84,19 @@
                 </div>
             </form>
             <div class="mb-5"></div>
+            <hr class="my-3">
+            <form method="post" action="/delete/{{ user.pk }}/">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md">
+                        <p class="fw-bold">Suppression du compte utilisateur</p>
+                    </div>
+                    <div class="col align-self-end">
+                        <button class="btn btn-danger" type="submit">Supprimer</button>
+                    </div>
+                </div>
+            </form>
+            <div class="mb-5"></div>
         </div>
     </div>
     <div class="row justify-content-md-center">

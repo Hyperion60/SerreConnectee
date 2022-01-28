@@ -50,17 +50,35 @@ def __send_recover_email(request, user):
     send_mail(mail_subject, mail_message, EMAIL_HOST_USER, [user.email], fail_silently=False)
 
 
+def __send_delete_email(request, user):
+    mail_subject = "Suppression du compte - Serre Connectée"
+    current_site = get_current_site(request)
+    mail_message = render_to_string('User/email/delete_user.html',
+        {
+            'user': user,
+            'domain': current_site,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user=user)
+        }
+    )
+    send_mail(mail_subject, mail_message, EMAIL_HOST_USER, [user.email], fail_silently=False)
+
+
 def about(request):
     return render(request, "about.html")
 
 
 def index(request):
+    context = {}
     if request.GET.get('code', '') == '1':
-        context = {
-            'message': "Mot de passe modifié avec succès"
-        }
-        return render(request, "index.html", context)
-    return render(request, "index.html")
+        context['message'] = "Mot de passe modifié avec succès"
+    elif request.GET.get('code', '') == '2':
+        context['message'] = "La suppression a été annulée"
+    elif request.GET.get('code', '') == '3':
+        context['message'] = "Le compte utilisateur a été supprimé avec succès"
+    elif request.GET.get('code', '') == '4':
+        context['message'] = "Un email de validation vient de vous être envoyé pour confirmer la suppression"
+    return render(request, "index.html", context)
 
 
 def logout_user(request):
@@ -113,6 +131,8 @@ def signup_user(request):
             __check_email(context, request.POST['email'])
             if len(User.objects.filter(email__exact=request.POST['email'])):
                 context['errors'].append("L'adresse e-mail est déjà utilisée")
+            if len(User.objects.filter(username__exact=request.POST['username'])):
+                context['errors'].append("Le nom d'utilisateur est déjà utilisé")
             if not len(context['errors']):
                 context['email'] = request.POST['email']
                 if request.POST['password1'] != request.POST['password2']:
@@ -243,6 +263,33 @@ def user_detail(request):
     return render(request, "User/detail.html", context)
 
 
+def user_delete(request, uidb64, token):
+    context = {
+        'errors': [],
+        'token': token,
+        'uidb64': uidb64
+    }
+
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, User.DoesNotExist):
+        user = None
+        context['errors'].append("Le lien est invalide, contactez un administrateur")
+
+    if user is not None:
+        if request.POST:
+            if account_activation_token.check_token(user, token):
+                if request.POST.get('cancel', None):
+                    return redirect("/?code=2")
+                if request.POST.get('delete', None):
+                    user.delete()
+                    return redirect("/?code=3")
+            context['errors'].append("Le lien est invalide, recommencez la procédure")
+
+    return render(request, "User/delete.html", context)
+
+
 @csrf_exempt
 def test_arduino(request):
     if request.POST:
@@ -250,3 +297,22 @@ def test_arduino(request):
         print(request.POST.content)
     print(request.body.decode())
     return HttpResponse("OK")
+
+
+@login_required(login_url="/login/")
+def user_ask_delete(request, pk):
+    context = {
+        'errors': [],
+        'user': None,
+    }
+    if request.POST:
+        try:
+            context['user'] = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            context['errors'].append("L'utilisateur demandé n'existe pas.")
+
+        if context['user'] is not None:
+            __send_delete_email(request, context['user'])
+            return redirect("/?code=4")
+
+    return render(request, "User/detail.html", context)
