@@ -6,7 +6,7 @@ class Serre(models.Model):
     name = models.CharField(unique=True, default="New serre", max_length=250)
     type_culture = models.CharField(default="Cannabis", max_length=250)
     # Authentification
-    otp = models.IntegerField(unique=True, default="00000")
+    token = models.CharField(unique=True, max_length=64, default="000000")
 
     # Actionneurs
     chauffage = models.BooleanField(default=False)
