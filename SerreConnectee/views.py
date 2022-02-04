@@ -12,7 +12,6 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 
-from Serre.models import Serre
 from SerreConnectee.tokens import account_activation_token
 from SerreConnectee.settings import EMAIL_HOST_USER
 

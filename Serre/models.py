@@ -24,7 +24,7 @@ class Serre(models.Model):
     fin_jour = models.TimeField(default=None)
 
     # Options
-    DeviceEUI = models.CharField(default=None, max_length=16)
+    DeviceEUI = models.CharField(default=None, max_length=16, null=True)
     user = models.ForeignKey(User, models.CASCADE, default=None)
 
 

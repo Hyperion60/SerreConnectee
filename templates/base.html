@@ -32,7 +32,7 @@
                         {% if restricted is None %}
                         {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{% url 'serre-add' %}?next={{ request.path }}">
                                 <i class="fa fa-plus"></i>
                                 Ajouter Serre
                             </a>
