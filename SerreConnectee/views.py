@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
@@ -12,6 +14,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 
+from Serre.models import Serre, Releves
 from SerreConnectee.tokens import account_activation_token
 from SerreConnectee.settings import EMAIL_HOST_USER
 
@@ -77,6 +80,8 @@ def index(request):
         context['message'] = "Le compte utilisateur a été supprimé avec succès"
     elif request.GET.get('code', '') == '4':
         context['message'] = "Un email de validation vient de vous être envoyé pour confirmer la suppression"
+    elif request.GET.get('code', '') == '5':
+        context['message'] = "La serre a été créée avec succès"
     return render(request, "index.html", context)
 
 
@@ -257,8 +262,28 @@ def user_detail(request):
         except MultiValueDictKeyError:
             context['errors'].append("Un ou plusieurs champs sont manquants")
 
-    # context['serres'] = Serre.objects.filter(user=request.user)
-    # context['serre_len'] = len(context['serres'])
+    context['serres'] = Serre.objects.filter(user=request.user)
+    context['status'] = []
+    context['date'] = []
+    for serre in context['serres']:
+        releves = Releves.objects.filter(serre=serre).order_by('timestamp')
+        if len(releves) and releves[0].timestamp - datetime.datetime.now() < datetime.timedelta(hours=6):
+            last = releves[0].timestamp
+            context['status'].append("En ligne")
+            context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(last.day,
+                                                                                        last.month,
+                                                                                        last.year,
+                                                                                        last.hour,
+                                                                                        last.minute,
+                                                                                        last.second))
+        else:
+            context['status'].append("Hors ligne")
+            context['date'].append("Jamais")
+
+    context['list_serres'] = zip(context['serres'],
+                                 range(1, len(context['serres']) + 1),
+                                 context['status'],
+                                 context['date'])
     return render(request, "User/detail.html", context)
 
 

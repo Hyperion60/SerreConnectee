@@ -107,39 +107,42 @@
     </div>
     <div class="row justify-content-center">
         <div class="accordion" id="SerreList">
+            {% if serres is not None %}
+            {% for serre, nb, status, releve_date in list_serres %}
             <div class="accordion-item">
-                <h2 class="accordion-header" id="Serre1">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        Serre n°1 - Ma Serre
+                <h2 class="accordion-header" id="Serre{{ nb }}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ nb }}" aria-expanded="true" aria-controls="collapse{{ nb }}">
+                        Serre n°{{ nb }} - {{ serre.name }}
                     </button>
                 </h2>
-                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="Serre1" data-bs-parent="#SerreList">
+                <div id="collapse{{ nb }}" class="accordion-collapse collapse" aria-labelledby="Serre{{ nb }}" data-bs-parent="#SerreList">
                     <div class="accordion-body">
                         <table class="table">
                             <tbody>
                                 <tr>
                                     <th>Type de culture</th>
-                                    <td>Cannabis</td>
+                                    <td>{{ serre.type_culture }}</td>
                                 </tr>
                                 <tr>
                                     <th>Status</th>
-                                    <td style="color: darkred;">Hors ligne</td>
+                                    <td>{{ status }}</td>
                                 </tr>
                                 <tr>
                                     <th>Date du dernier relevé</th>
-                                    <td>Jamais</td>
+                                    <td>{{ releve_date }}</td>
                                 </tr>
                                 <tr>
                                     <th>Jetons d'authentification</th>
-                                    <td class="token">jdslkfqjkdjfk</td>
-                                    <td><input class="btn btn-primary btn-success ajax-gen" id="1" type="submit" value="Générer"></td>
-                                    <!--<td><button class="btn btn-primary" type="submit" id="ajax-gen">Générer</button></td>-->
+                                    <td class="token" id="token-{{ nb }}">{{ serre.token }}</td>
+                                    <td><input class="btn btn-success ajax-gen" id="{{ nb }}" type="submit" onclick="AJAXToken(this)" value="Générer"></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+            {% endfor %}
+            {% endif %}
         </div>
     </div>
     <div class="mb-5"></div>
@@ -147,5 +150,17 @@
 </div>
 {% endblock %}
 {% block script %}
-
+function AJAXToken(button) {
+    var token_id = "token".concat("-", button.getAttribute("id"));
+    var token = document.getElementById(token_id);
+    const xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var jsonObj = JSON.parse(this.responseText);
+            token.textContent = jsonObj.token;
+        }
+    }
+    xhttp.open("GET", "/serre/update/token/".concat(token.textContent));
+    xhttp.send();
+}
 {% endblock %}

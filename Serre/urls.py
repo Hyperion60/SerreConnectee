@@ -4,4 +4,5 @@ from Serre import views
 
 urlpatterns = [
     path('add/', views.serre_add, name="serre-add"),
+    path('update/token/<str:token>/', views.renew_token, name="renew-token"),
 ]

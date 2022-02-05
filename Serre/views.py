@@ -1,7 +1,8 @@
 import binascii, datetime, os
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.utils.datastructures import MultiValueDictKeyError
 
 from Serre.models import Serre
@@ -34,9 +35,22 @@ def serre_add(request):
                               token=binascii.hexlify(os.urandom(15)).decode())
             new_serre.save()
             context['serre'] = new_serre
+            return redirect("/?code=5")
         except MultiValueDictKeyError:
             context['errors'].append("Champs manquants")
         except ReferenceError:
             context['errors'].append("Une serre porte déjà ce nom")
 
     return render(request, "Serre/add-serre.html", context)
+
+
+def renew_token(request, token):
+    context = {}
+    try:
+        context['serre'] = Serre.objects.get(token__exact=token)
+    except Serre.DoesNotExist:
+        context['error'] = "Token invalide"
+
+    context['serre'].token = binascii.hexlify(os.urandom(15)).decode()
+    context['serre'].save()
+    return JsonResponse({'token': context['serre'].token})
