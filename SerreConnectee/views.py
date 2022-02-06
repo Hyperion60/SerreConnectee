@@ -243,8 +243,11 @@ def user_detail(request):
     context = {
         'errors': [],
         'user': request.user,
-        'date_joined': request.user.date_joined.replace(microsecond=0)
+        'date_joined': request.user.date_joined.replace(microsecond=0),
+        'code': request.GET.get('code', None)
     }
+    if context['code'] == '1':
+        context['message'] = "La serre a été modifiée avec succès"
     if request.POST:
         try:
             old_pass = request.POST['old-password']

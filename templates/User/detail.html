@@ -122,10 +122,12 @@
                                 <tr>
                                     <th>Type de culture</th>
                                     <td>{{ serre.type_culture }}</td>
+                                    <td><a class="btn btn-primary" href="{% url 'modify-serre' serre.pk %}">Modifier la serre</a></td>
                                 </tr>
                                 <tr>
                                     <th>Status</th>
                                     <td>{{ status }}</td>
+                                    <td><a class="btn btn-danger" href="#">Supprimer la serre</a></td>
                                 </tr>
                                 <tr>
                                     <th>Date du dernier relevé</th>
@@ -134,7 +136,7 @@
                                 <tr>
                                     <th>Jetons d'authentification</th>
                                     <td class="token" id="token-{{ nb }}">{{ serre.token }}</td>
-                                    <td><input class="btn btn-success ajax-gen" id="{{ nb }}" type="submit" onclick="AJAXToken(this)" value="Générer"></td>
+                                    <td><input class="btn btn-success ajax-gen" id="{{ nb }}" type="submit" onclick="AJAXToken(this)" value="Générer le jeton"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -142,11 +144,17 @@
                 </div>
             </div>
             {% endfor %}
+            {% else %}
+
             {% endif %}
         </div>
     </div>
     <div class="mb-5"></div>
-
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="invalidTokenToast" class="toast hide text-white bg-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+            <div class="toast-body" id="invalidTokenToastText"></div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 {% block script %}
@@ -157,10 +165,19 @@ function AJAXToken(button) {
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             var jsonObj = JSON.parse(this.responseText);
-            token.textContent = jsonObj.token;
+            if (jsonObj.hasOwnProperty("token")) {
+                token.textContent = jsonObj.token;
+            } else if (jsonObj.hasOwnProperty("error")) {
+                var alertText = document.getElementById("invalidTokenToastText");
+                var alertToast = document.getElementById("invalidTokenToast");
+                alertText.textContent = jsonObj.error;
+                var bsAlert = new bootstrap.Toast(alertToast);
+                bsAlert.show();
+                console.log(jsonObj.error);
+            }
         }
     }
-    xhttp.open("GET", "/serre/update/token/".concat(token.textContent));
+    xhttp.open("GET", "/serre/update/token/".concat(token.textContent, "/"));
     xhttp.send();
 }
 {% endblock %}
