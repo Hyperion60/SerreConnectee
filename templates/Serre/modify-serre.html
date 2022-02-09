@@ -114,7 +114,7 @@
                     <div class="col-12 col-sm-8">
                         <div class="input-group mb-3">
                             <span class="input-group-text material-icons">water_drop</span>
-                            <span class="input-group-text" id="temp-label-addon">Humidité de l'air maximale</span>
+                            <span class="input-group-text" id="hum-air-label-addon">Humidité de l'air maximale</span>
                             <input type="number" class="form-control" id="hum-air-value-input" name="hum-air"
                                    placeholder="50" aria-describedby="hum-air-addon" min="0" max="100"
                                    value="{{ serre.seuil_air_humid|stringformat:'d' }}" required>
@@ -126,11 +126,11 @@
                     <div class="col-12 col-sm-8">
                         <div class="input-group mb-3">
                             <span class="input-group-text material-icons">grass</span>
-                            <span class="input-group-text" id="temp-label-addon">Humidité du sol minimale</span>
-                            <input type="number" class="form-control" id="hum-air-value-input" name="hum-air"
-                                   placeholder="50" aria-describedby="hum-air-addon" min="0" max="100"
+                            <span class="input-group-text" id="hum-sol-label-addon">Humidité du sol minimale</span>
+                            <input type="number" class="form-control" id="hum-sol-value-input" name="hum-sol"
+                                   placeholder="50" aria-describedby="hum-sol-addon" min="0" max="100"
                                    value="{{ serre.seuil_sol_humid|stringformat:'d' }}" required>
-                            <span class="input-group-text" id="hum-air-addon">%</span>
+                            <span class="input-group-text" id="hum-sol-addon">%</span>
                         </div>
                     </div>
                 </div>
