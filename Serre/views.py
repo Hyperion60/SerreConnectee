@@ -81,41 +81,126 @@ def modify_serre(request, pk):
         return render(request, "User/detail.html", context)
 
     if request.POST:
+        # Récupération du nom de la serre
         try:
             context['name'] = request.POST['name']
-            context['culture'] = request.POST['culture']
-            context['lora'] = request.POST.get('lora', '')
-            context['debutjour'] = request.POST['debut']
-            context['finjour'] = request.POST['fin']
             if not len(context['name']):
-                raise ValueError("Name")
+                raise ValueError
+        except MultiValueDictKeyError:
+            context['errors'].append("Le champs 'nom de la serre' est manquant")
+        except ValueError:
+            context['errors'].append("Le nom de la serre ne peut pas être vide")
+
+        # Récupération du type de culture
+        try:
+            context['culture'] = request.POST['culture']
             if not len(context['culture']):
-                raise ValueError("Culture")
+                raise ValueError
+        except MultiValueDictKeyError:
+            context['errors'].append("Le champs 'type de culture' est manquant")
+        except ValueError:
+            context['errors'].append("Le type de culture ne peut pas être vide")
+
+        # Récupération de la luminosité minimale
+        try:
+            context['lumino'] = request.POST['lumino']
+            if not context['lumino'].isdigit():
+                raise TypeError
+            if int(context['lumino']) < 0:
+                raise ValueError
+        except MultiValueDictKeyError:
+            context['errors'].append("Le champ 'Luminosité' est manquant")
+        except TypeError:
+            context['errors'].append("La luminosité doit être un nombre")
+        except ValueError:
+            context['errors'].append("La luminosité ne peut pas être négative")
+
+        # Récupération de l'heure de début de journée
+        try:
+            context['debutjour'] = request.POST['debut']
+            if not len(context['debutjour']):
+                raise ValueError
+            if len(context['debutjour'].split(':')) != 2:
+                raise AttributeError
             if not context['debutjour'].split(':')[0].isdigit() or \
                     not context['debutjour'].split(':')[1].isdigit():
-                raise TypeError("Debut")
+                raise TypeError
+            if 23 < context['debutjour'].split(':')[0] < 0 or \
+                    23 < context['debutjour'].split(':')[1] < 0:
+                raise OverflowError
+        except MultiValueDictKeyError:
+            context['errors'].append("Le champ 'Debut de journée' est manquant")
+        except ValueError:
+            context['errors'].append("L'heure de début ne peut pas être vide")
+        except (AttributeError, TypeError, OverflowError):
+            context['errors'].append("L'heure de début n'est pas dans le bon format '13:59'")
+
+        # Récupération de l'heure de fin de journée
+        try:
+            context['finjour'] = request.POST['fin']
+            if not len(context['finjour']):
+                raise ValueError
+            if len(context['finjour'].split(':')) != 2:
+                raise AttributeError
             if not context['finjour'].split(':')[0].isdigit() or \
                     not context['finjour'].split(':')[1].isdigit():
-                raise TypeError("Fin")
-            context['serre'].name = context['name']
-            context['serre'].type_culture = context['culture']
-            if len(context['lora']):
-                context['serre'].DeviceEUI = context['lora']
-            context['serre'].debut_jour = datetime.time(
-                hour=int(context['debutjour'].split(':')[0]),
-                minute=int(context['debutjour'].split(':')[1]),
-            )
-            context['serre'].fin_jour = datetime.time(
-                hour=int(context['finjour'].split(':')[0]),
-                minute=int(context['finjour'].split(':')[1]),
-            )
-            context['serre'].save()
-            return redirect("/detail/?code=1")
+                raise TypeError
+            if 23 < context['finjour'].split(':')[0] < 0 or \
+                    23 < context['finjour'].split(':')[1] < 0:
+                raise OverflowError
         except MultiValueDictKeyError:
-            context['errors'].append("Un ou plusieurs champs manquants")
-        except (IndexError, TypeError):
-            context['errors'].append("Le format des champs de temps est '13:59'")
-        except ValueError as err:
-            context['errors'].append("Le champs {} ne peut pas être vide".format(err.args[0]))
+            context['errors'].append("Le champ 'Fin de journée' est manquant")
+        except ValueError:
+            context['errors'].append("L'heure de fin ne peut pas être vide")
+        except (AttributeError, TypeError, OverflowError):
+            context['errors'].append("L'heure de fin n'est pas dans le bon format '13:59'")
+
+        # Récupération de la température
+        try:
+            context['temp'] = request.POST['temperature']
+            if not len(context['temp']):
+                raise ValueError
+            if not context['temp'].isdigit():
+                raise TypeError
+            if int(context['temp']) < -273:
+                raise OverflowError
+        except MultiValueDictKeyError:
+            context['errors'].append("Le champ 'Température' est manquant")
+        except ValueError:
+            context['errors'].append("La température ne peut pas être vide")
+        except OverflowError:
+            context['errors'].append("La température ne peut pas être inférieure au zéro absolu")
+
+        # Récupération de l'humidité de l'air
+        try:
+            context['hum-air'] = request.POST['hum-air']
+            if not len(context['hum-air']):
+                raise ValueError
+            if not context['hum-air'].isdigit():
+                raise TypeError
+            if 100 < int(context['hum-air']) < 0:
+                raise OverflowError
+        except MultiValueDictKeyError:
+            context['errors'].append("Le champ 'Humidité de l'air' est manquant")
+        except ValueError:
+            context['errors'].append("L'humidité de l'air ne peut pas être vide")
+        except OverflowError:
+            context['errors'].append("L'humidité de l'air doit être compris entre 0 et 100")
+
+        # Récupération de l'humidité du sol
+        try:
+            context['hum-sol'] = request.POST['hum-sol']
+            if not len(context['hum-air']):
+                raise ValueError
+            if not context['hum-air'].isdigit():
+                raise TypeError
+            if 100 < int(context['hum-air']) < 0:
+                raise OverflowError
+        except MultiValueDictKeyError:
+            context['errors'].append("Le champ 'Humidité du sol' est manquant")
+        except ValueError:
+            context['errors'].append("L'humidité du sol ne peut pas être vide")
+        except OverflowError:
+            context['errors'].append("L'humidité du sol doit être compris entre 0 et 100")
 
     return render(request, "Serre/modify-serre.html", context)
