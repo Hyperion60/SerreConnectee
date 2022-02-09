@@ -5,7 +5,11 @@ from django.contrib.auth.models import User
 class Serre(models.Model):
     name = models.CharField(default="New serre", max_length=250)
     type_culture = models.CharField(default="Cannabis", max_length=250)
-    # Authentification
+
+    # Wi-Fi
+    password_wpa = models.CharField(default=None, null=True, max_length=250)
+    login_peap = models.CharField(default=None, null=True, max_length=250)
+    password_peap = models.CharField(default=None, null=True, max_length=250)
     token = models.CharField(unique=True, max_length=64, default="000000")
 
     # Actionneurs
@@ -23,8 +27,12 @@ class Serre(models.Model):
     debut_jour = models.TimeField(default=None)
     fin_jour = models.TimeField(default=None)
 
-    # Options
+    # LoRa
     DeviceEUI = models.CharField(default=None, max_length=16, null=True)
+    DevAddr = models.CharField(default=None, max_length=16, null=True)
+    NetworkSKey = models.CharField(default=None, max_length=250, null=True)
+    AppSKey = models.CharField(default=None, max_length=250, null=True)
+
     user = models.ForeignKey(User, models.CASCADE, default=None)
 
 
