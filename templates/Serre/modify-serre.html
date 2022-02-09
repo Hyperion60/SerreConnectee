@@ -2,6 +2,7 @@
 {% block style %}
     </style>
     <link rel="stylesheet" href="/static/serre/css/mdb.min.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
 {% endblock %}
 {% block content %}
     <div class="container">
@@ -38,18 +39,24 @@
                     <hr class="my-3">
                 </div>
             </div>
-            <div class="row justify-content-center">
-                <div class="mb-3" style="min-width: 50%">
-                    <label for="name-input" class="form-label">Nom de la serre</label>
-                    <input type="text" class="form-control" id="name-input" name="name" value="{{ serre.name }}"
-                           required>
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="lux-label-addon">Nom de la serre</span>
+                            <input type="text" class="form-control" id="name-input" name="name" value="{{ serre.name }}"
+                                   required>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="mb-3" style="min-width: 50%;">
-                    <label for="culture-input" class="form-label">Type de culture</label>
-                    <input type="text" class="form-control" id="culture-input" name="culture"
-                           value="{{ serre.type_culture }}" required>
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="lux-label-addon">Type de culture</span>
+                            <input type="text" class="form-control" id="culture-input" name="culture"
+                                   value="{{ serre.type_culture }}" required>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -60,38 +67,70 @@
                 </div>
             </div>
             <div class="container">
-                <div class="row justify-content-center">
-                    <div class="mb-3" style="min-width: 50%;">
-                        <label for="lumino-input" class="form-label">Luminosité minimale</label>
-                        <input type="range" class="form-range" min="1" max="10000" id="lumino-input"
-                               onchange="updateluminoinput(this.value);">
-                    </div>
-                </div>
                 <div class="row">
-                    <div class="col-12 col-sm-6">
+                    <div class="col-12 col-sm-8">
                         <div class="input-group mb-3">
-                            <span class="input-group-text" id="lux-label-addon">Valeur sélectionnée</span>
+                            <span class="input-group-text material-icons">light_mode</span>
+                            <span class="input-group-text" id="lux-label-addon">Luminosité minimale</span>
                             <input type="number" class="form-control" id="lumino-value-input" name="lumino"
-                                   placeholder="Luminosité" aria-describedby="lux-addon" required>
+                                   placeholder="1500" aria-describedby="lux-addon" required>
                             <span class="input-group-text" id="lux-addon">Lux</span>
                         </div>
                     </div>
                 </div>
-                <div class="row justify-content-center">
-                    <div class="mb-3" style="min-width: 50%">
-                        <div class="md-form">
-                            <label for="input-starttime">Debut de la journée</label>
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">light_mode</span>
+                            <span class="input-group-text" id="lux-label-addon">Début de la journée</span>
                             <input type="text" name="debut" class="form-control timepicker" id="input-starttime"
                                    placeholder="Heure selectionnée" value="{{ debut }}">
                         </div>
                     </div>
                 </div>
-                <div class="row justify-content-center">
-                    <div class="mb-3" style="min-width: 50%">
-                        <div class="md-form">
-                            <label for="input-endtime">Fin de la journée</label>
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">light_mode</span>
+                            <span class="input-group-text" id="lux-label-addon">Fin de la journée</span>
                             <input type="text" name="fin" class="form-control timepicker" id="input-endtime"
                                    placeholder="Heure selectionnée" value="{{ fin }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">thermostat</span>
+                            <span class="input-group-text" id="temp-label-addon">Température minimale</span>
+                            <input type="number" class="form-control" id="temp-value-input" name="temperature"
+                                   placeholder="1500" aria-describedby="temp-addon" min="0" max="55"
+                                   value="{{ serre.seuil_temp|stringformat:'d' }}" required>
+                            <span class="input-group-text" id="temp-addon">°C</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">water_drop</span>
+                            <span class="input-group-text" id="temp-label-addon">Humidité de l'air maximale</span>
+                            <input type="number" class="form-control" id="hum-air-value-input" name="hum-air"
+                                   placeholder="50" aria-describedby="hum-air-addon" min="0" max="100"
+                                   value="{{ serre.seuil_air_humid|stringformat:'d' }}" required>
+                            <span class="input-group-text" id="hum-air-addon">%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">grass</span>
+                            <span class="input-group-text" id="temp-label-addon">Humidité du sol minimale</span>
+                            <input type="number" class="form-control" id="hum-air-value-input" name="hum-air"
+                                   placeholder="50" aria-describedby="hum-air-addon" min="0" max="100"
+                                   value="{{ serre.seuil_sol_humid|stringformat:'d' }}" required>
+                            <span class="input-group-text" id="hum-air-addon">%</span>
                         </div>
                     </div>
                 </div>
@@ -103,11 +142,118 @@
                     <hr class="my-3">
                 </div>
             </div>
-            <div class="row justify-content-center">
-                <div class="mb-3" style="min-width: 50%;">
-                    <label for="lora-input" class="form-label">Device EUID LoRa (optionnel)</label>
-                    <input type="text" class="form-control" id="lora-input" name="lora" placeholder="70B5E57ED0046B56"
-                           value="{{ eui }}">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">fingerprint</span>
+                            <span class="input-group-text" id="devuid-addon">Device EUID LoRa (optionnel)</span>
+                            <input type="text" class="form-control" id="dev-eui-value-input" name="dev-eui"
+                                   placeholder="70B5E57ED0046B56">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">import_contacts</span>
+                            <span class="input-group-text" id="devadr-addon">Device Address</span>
+                            <input type="text" class="form-control" id="dev-adr-value-input" name="dev-adr"
+                                   placeholder="260B2F65">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">vpn_key</span>
+                            <span class="input-group-text" id="nwkskey-addon">Clé de Session Réseau (NwkSKey)</span>
+                            <input type="text" class="form-control" id="nwkskey-value-input" name="nwkskey"
+                                   placeholder="0x34, 0xE7, 0x78, ... (format MSB)">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">vpn_key</span>
+                            <span class="input-group-text"
+                                  id="appskey-addon">Clé de Session Applicative (AppSKey)</span>
+                            <input type="text" class="form-control" id="appskey-value-input" name="appskey"
+                                   placeholder="0xDF, 0xB2, 0x7B, ... (Format MSB)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="mb-5"></div>
+                <div class="mb-3">
+                    <h2>Communication Wi-Fi</h2>
+                    <hr class="my-3">
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-sm-8">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text material-icons">badge</span>
+                            <span class="input-group-text"
+                                  id="appskey-addon">Nom du réseau (SSID)</span>
+                            <input type="text" class="form-control" id="wifi-name-input" name="wifi-name"
+                                   placeholder="SFR_B890">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="accordion" id="WifiList">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="WPATitle">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseWPA" aria-expanded="true" aria-controls="collapseWPA">
+                                    Authentification par WPA/WPA2 (mot de passe)
+                                </button>
+                            </h2>
+                            <div id="collapseWPA" class="accordion-collapse collapse" aria-labelledby="WPATitle"
+                                 data-bs-parent="#WifiList">
+                                <div class="accordion-body">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text material-icons">vpn_key</span>
+                                        <span class="input-group-text"
+                                              id="appskey-addon">Mot de passe Wifi</span>
+                                        <input type="password" class="form-control" id="wpa-key-input" name="wpa-key"
+                                               placeholder="Mot de passe Wifi">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="PEAPTitle">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapsePEAP" aria-expanded="true" aria-controls="collapsePEAP">
+                                    Authentification par PEAP (login + mot de passe)
+                                </button>
+                            </h2>
+                            <div id="collapsePEAP" class="accordion-collapse collapse" aria-labelledby="PEAPTitle"
+                                 data-bs-parent="#WifiList">
+                                <div class="accordion-body">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text material-icons">badge</span>
+                                        <span class="input-group-text"
+                                              id="appskey-addon">Identifiant</span>
+                                        <input type="text" class="form-control" id="peap-id-input" name="peap-id"
+                                               placeholder="prenom.nom@unilasalle.fr">
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text material-icons">vpn_key</span>
+                                        <span class="input-group-text"
+                                              id="appskey-addon">Mot de passe</span>
+                                        <input type="password" class="form-control" id="peap-key-input" name="peap-key"
+                                               placeholder="Mot de passe">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="mb-5"></div>
