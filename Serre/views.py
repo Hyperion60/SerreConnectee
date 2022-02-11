@@ -1,11 +1,14 @@
 import binascii, datetime, os
+import json
+import re
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.datastructures import MultiValueDictKeyError
+from django.views.decorators.csrf import csrf_exempt
 
-from Serre.models import Serre
+from Serre.models import Serre, Releves
 
 
 @login_required(login_url="/login/")
@@ -66,10 +69,6 @@ def modify_serre(request, pk):
         context['serre'] = Serre.objects.get(pk=pk)
         context['debut'] = "{:02d}:{:02d}".format(context['serre'].debut_jour.hour, context['serre'].debut_jour.minute)
         context['fin'] = "{:02d}:{:02d}".format(context['serre'].fin_jour.hour, context['serre'].fin_jour.minute)
-        if not context['serre'].DeviceEUI:
-            context['eui'] = ""
-        else:
-            context['eui'] = context['serre'].DeviceEUI
         if request.user != context['serre'].user:
             raise AssertionError
     except Serre.DoesNotExist:
@@ -121,12 +120,13 @@ def modify_serre(request, pk):
             if not len(context['debutjour']):
                 raise ValueError
             if len(context['debutjour'].split(':')) != 2:
+                print("longueur: {}".format(len(context['debutjour'].split(':'))))
                 raise AttributeError
             if not context['debutjour'].split(':')[0].isdigit() or \
                     not context['debutjour'].split(':')[1].isdigit():
                 raise TypeError
-            if 23 < context['debutjour'].split(':')[0] < 0 or \
-                    23 < context['debutjour'].split(':')[1] < 0:
+            if 23 < int(context['debutjour'].split(':')[0]) < 0 or \
+                    23 < int(context['debutjour'].split(':')[1]) < 0:
                 raise OverflowError
         except MultiValueDictKeyError:
             context['errors'].append("Le champ 'Debut de journée' est manquant")
@@ -141,12 +141,13 @@ def modify_serre(request, pk):
             if not len(context['finjour']):
                 raise ValueError
             if len(context['finjour'].split(':')) != 2:
+                print("longueur: {}".format(len(context['finjour'].split(':'))))
                 raise AttributeError
             if not context['finjour'].split(':')[0].isdigit() or \
                     not context['finjour'].split(':')[1].isdigit():
                 raise TypeError
-            if 23 < context['finjour'].split(':')[0] < 0 or \
-                    23 < context['finjour'].split(':')[1] < 0:
+            if 23 < int(context['finjour'].split(':')[0]) < 0 or \
+                    23 < int(context['finjour'].split(':')[1]) < 0:
                 raise OverflowError
         except MultiValueDictKeyError:
             context['errors'].append("Le champ 'Fin de journée' est manquant")
@@ -203,4 +204,98 @@ def modify_serre(request, pk):
         except OverflowError:
             context['errors'].append("L'humidité du sol doit être compris entre 0 et 100")
 
+        # Récupération du Device EUID
+        try:
+            context['devEUI'] = request.POST.get('dev-eui', None)
+            if context['devEUI']:
+                if len(context['devEUI']) != 16:
+                    raise ValueError
+                for char in context['devEUI']:
+                    if 'F' < char < '0':
+                        raise TypeError
+        except ValueError:
+            context['errors'].append("Le Device EUI doit faire 16 caractères hexadécimales de long")
+        except TypeError:
+            context['errors'].append("Le Device EUI contient des caractères invalides (non-compris entre 0 et F)")
+
+        # Récupération du Device Address
+        try:
+            context['devAdr'] = request.POST.get('dev-adr', None)
+            if context['devAdr']:
+                if len(context['devAdr']) != 8:
+                    raise ValueError
+                for char in context['devAdr']:
+                    if 'F' < char < '0':
+                        raise TypeError
+        except ValueError:
+            context['errors'].append("Le Device Address doit faire 8 caractères hexadécimales de long")
+        except TypeError:
+            context['errors'].append("Le Device Address contient des caractères invalides (non-compris entre 0 et F)")
+
+        # Récupération de la clé Réseau
+        try:
+            context['nwkSKey'] = request.POST.get('nwkskey', None)
+            if context['nwkSKey']:
+                if len(context['nwkSKey'].split(',')) != 16:
+                    raise ValueError
+                if not re.match("(0x[0-9A-F]{2}){1}(, 0x[0-9A-F]{2}){15}", context['nwkSKey']) and \
+                        not re.match("(0x[0-9A-F]{2}){1}(,0x[0-9A-F]{2}){15}", context['nwkSKey']):
+                    raise TypeError
+        except ValueError:
+            context['errors'].append("La Clé Réseau doit faire 16 elements de long")
+        except TypeError:
+            context['errors'].append("La Clé Réseau contient des caractères invalides (non-compris entre 0 et F)")
+
+        # Récupération de la clé applicative
+        try:
+            context['appSKey'] = request.POST.get('appskey', None)
+            if context['appSKey']:
+                if len(context['appSKey'].split(',')) != 16:
+                    raise ValueError
+                if not re.match("(0x[0-9A-F]{2}){1}(, 0x[0-9A-F]{2}){15}", context['appSKey']) and \
+                        not re.match("(0x[0-9A-F]{2}){1}(,0x[0-9A-F]{2}){15}", context['appSKey']):
+                    raise TypeError
+        except ValueError:
+            context['errors'].append("La Clé Applicative doit faire 16 elements de long")
+        except TypeError:
+            context['errors'].append("La Clé Applicative contient des caractères invalides (non-compris entre 0 et F)")
+
+        # Récupération du nom de la Wifi
+        context['ssid'] = request.POST.get('wifi-name', None)
+
+        # Récupération de la clé Wifi WPA
+        context['pass-wpa'] = request.POST.get('wpa-key', None)
+
+        # Récupération des crédentials PEAP
+        context['login-peap'] = request.POST.get('peap-id', None)
+        context['pass-peap'] = request.POST.get('peap-key', None)
+
+        # Mise à jour de la serre
+        context['serre'].name = context['name']
+        context['serre'].type_culture = context['culture']
+
+        context['serre'].seuil_temp = context['temp']
+        context['serre'].seuil_air_humid = context['hum-air']
+        context['serre'].seuil_sol_humid = context['hum-sol']
+        context['serre'].debut_jour = datetime.time(
+            hour=int(context['debut'].split(':')[0]),
+            minute=int(context['debut'].split(':')[1])
+        )
+        context['serre'].fin_jour = datetime.time(
+            hour=int(context['fin'].split(':')[0]),
+            minute=int(context['fin'].split(':')[1])
+        )
+
+        context['serre'].DeviceEUI = context['devEUI']
+        context['serre'].DevAddr = context['devAdr']
+        context['serre'].NetworkSKey = context['nwkSKey']
+        context['serre'].AppSKey = context['appSKey']
+
+        context['serre'].ssid = context['ssid']
+        context['serre'].password_wpa = context['pass-wpa']
+        context['serre'].login_peap = context['login-peap']
+        context['serre'].password_peap = context['pass-peap']
+
+        context['serre'].save()
+        return redirect("/detail/?code=1")
     return render(request, "Serre/modify-serre.html", context)

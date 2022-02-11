@@ -7,6 +7,7 @@ class Serre(models.Model):
     type_culture = models.CharField(default="Cannabis", max_length=250)
 
     # Wi-Fi
+    ssid = models.CharField(default=None, null=True, max_length=250)
     password_wpa = models.CharField(default=None, null=True, max_length=250)
     login_peap = models.CharField(default=None, null=True, max_length=250)
     password_peap = models.CharField(default=None, null=True, max_length=250)
