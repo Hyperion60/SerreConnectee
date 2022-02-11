@@ -1,4 +1,7 @@
+import datetime
+
 from django.contrib.auth import authenticate, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.http import HttpResponse
@@ -11,6 +14,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 
+from Serre.models import Serre, Releves
 from SerreConnectee.tokens import account_activation_token
 from SerreConnectee.settings import EMAIL_HOST_USER
 
@@ -34,12 +38,51 @@ def __send_verification_email(request, user):
     send_mail(mail_subject, mail_message, EMAIL_HOST_USER, [user.email], fail_silently=False)
 
 
+def __send_recover_email(request, user):
+    mail_subject = "Réinitialisation du mot de passe - Serre Connectée"
+    current_site = get_current_site(request)
+    mail_message = render_to_string('User/email/recover_password.html',
+        {
+            'user': user,
+            'domain': current_site,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user=user)
+        }
+    )
+    send_mail(mail_subject, mail_message, EMAIL_HOST_USER, [user.email], fail_silently=False)
+
+
+def __send_delete_email(request, user):
+    mail_subject = "Suppression du compte - Serre Connectée"
+    current_site = get_current_site(request)
+    mail_message = render_to_string('User/email/delete_user.html',
+        {
+            'user': user,
+            'domain': current_site,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': account_activation_token.make_token(user=user)
+        }
+    )
+    send_mail(mail_subject, mail_message, EMAIL_HOST_USER, [user.email], fail_silently=False)
+
+
 def about(request):
     return render(request, "about.html")
 
 
 def index(request):
-    return render(request, "index.html")
+    context = {}
+    if request.GET.get('code', '') == '1':
+        context['message'] = "Mot de passe modifié avec succès"
+    elif request.GET.get('code', '') == '2':
+        context['message'] = "La suppression a été annulée"
+    elif request.GET.get('code', '') == '3':
+        context['message'] = "Le compte utilisateur a été supprimé avec succès"
+    elif request.GET.get('code', '') == '4':
+        context['message'] = "Un email de validation vient de vous être envoyé pour confirmer la suppression"
+    elif request.GET.get('code', '') == '5':
+        context['message'] = "La serre a été créée avec succès"
+    return render(request, "index.html", context)
 
 
 def logout_user(request):
@@ -92,6 +135,8 @@ def signup_user(request):
             __check_email(context, request.POST['email'])
             if len(User.objects.filter(email__exact=request.POST['email'])):
                 context['errors'].append("L'adresse e-mail est déjà utilisée")
+            if len(User.objects.filter(username__exact=request.POST['username'])):
+                context['errors'].append("Le nom d'utilisateur est déjà utilisé")
             if not len(context['errors']):
                 context['email'] = request.POST['email']
                 if request.POST['password1'] != request.POST['password2']:
@@ -139,6 +184,139 @@ def activate_account(request, uidb64, token):
     return render(request, "index.html", context)
 
 
+def recover_password(request):
+    context = {
+        'errors': [],
+        'restricted': True,
+    }
+    if request.POST:
+        try:
+            context['email'] = request.POST['email']
+            context['user'] = User.objects.get(email__exact=context['email'])
+            __send_recover_email(request, context['user'])
+            context['message'] = "Un email vient de vous être envoyer pour réinitialiser votre mot de passe"
+            return render(request, "index.html", context)
+        except MultiValueDictKeyError:
+            context['errors'].append("Champ email manquant")
+        except User.DoesNotExist:
+            context['errors'].append("L'adresse email est introuvable")
+
+    return render(request, "User/before-password.html", context)
+
+
+def modify_password(request, uidb64, token):
+    context = {
+        'errors': [],
+        'token': token,
+        'uidb64': uidb64,
+    }
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None:
+        if request.POST:
+            if account_activation_token.check_token(user, token):
+                try:
+                    password = request.POST['password']
+                    password2 = request.POST['password2']
+                    if password2 == password:
+                        user.set_password(password)
+                        user.save()
+                        return redirect("/?code=1")
+                    else:
+                        context['errors'].append("Les mots de passes ne correspondent pas")
+                except MultiValueDictKeyError:
+                    context['errors'].append("Un ou plusieurs champs requis ne sont pas renseignés")
+            else:
+                context['errors'].append("Le lien est invalide, veuillez recommencer la procédure")
+    else:
+        context['errors'].append("Le lien est invalide, veuillez recommencer la procédure")
+
+    return render(request, "User/after-password.html", context)
+
+
+@login_required(login_url="/login/")
+def user_detail(request):
+    context = {
+        'errors': [],
+        'user': request.user,
+        'date_joined': request.user.date_joined.replace(microsecond=0),
+        'code': request.GET.get('code', None)
+    }
+    if context['code'] == '1':
+        context['message'] = "La serre a été modifiée avec succès"
+    if request.POST:
+        try:
+            old_pass = request.POST['old-password']
+            new_pass = request.POST['new-password']
+            new_pass1 = request.POST['new-password1']
+            if request.user.check_password(old_pass) and new_pass == new_pass1:
+                request.user.set_password(new_pass)
+                request.user.save()
+                context['message'] = "Mot de passe modifié avec succès"
+            else:
+                if new_pass != new_pass1:
+                    context['errors'].append("Les nouveaux mots de passes ne correspondent pas")
+                else:
+                    context['errors'].append("L'ancien mot de passe est invalide")
+        except MultiValueDictKeyError:
+            context['errors'].append("Un ou plusieurs champs sont manquants")
+
+    context['serres'] = Serre.objects.filter(user=request.user)
+    context['status'] = []
+    context['date'] = []
+    for serre in context['serres']:
+        releves = Releves.objects.filter(serre=serre).order_by('timestamp')
+        if len(releves) and releves[0].timestamp - datetime.datetime.now() < datetime.timedelta(hours=6):
+            last = releves[0].timestamp
+            context['status'].append("En ligne")
+            context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(last.day,
+                                                                                        last.month,
+                                                                                        last.year,
+                                                                                        last.hour,
+                                                                                        last.minute,
+                                                                                        last.second))
+        else:
+            context['status'].append("Hors ligne")
+            context['date'].append("Jamais")
+
+    context['list_serres'] = zip(context['serres'],
+                                 range(1, len(context['serres']) + 1),
+                                 context['status'],
+                                 context['date'])
+    return render(request, "User/detail.html", context)
+
+
+def user_delete(request, uidb64, token):
+    context = {
+        'errors': [],
+        'token': token,
+        'uidb64': uidb64
+    }
+
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, User.DoesNotExist):
+        user = None
+        context['errors'].append("Le lien est invalide, contactez un administrateur")
+
+    if user is not None:
+        if request.POST:
+            if account_activation_token.check_token(user, token):
+                if request.POST.get('cancel', None):
+                    return redirect("/?code=2")
+                if request.POST.get('delete', None):
+                    user.delete()
+                    return redirect("/?code=3")
+            context['errors'].append("Le lien est invalide, recommencez la procédure")
+
+    return render(request, "User/delete.html", context)
+
+
 @csrf_exempt
 def test_arduino(request):
     if request.POST:
@@ -146,3 +324,22 @@ def test_arduino(request):
         print(request.POST.content)
     print(request.body.decode())
     return HttpResponse("OK")
+
+
+@login_required(login_url="/login/")
+def user_ask_delete(request, pk):
+    context = {
+        'errors': [],
+        'user': None,
+    }
+    if request.POST:
+        try:
+            context['user'] = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            context['errors'].append("L'utilisateur demandé n'existe pas.")
+
+        if context['user'] is not None:
+            __send_delete_email(request, context['user'])
+            return redirect("/?code=4")
+
+    return render(request, "User/detail.html", context)

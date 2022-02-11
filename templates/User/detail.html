@@ -1,8 +1,183 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="container">
-        <div class="row">
-            test
+<div class="container">
+    <div class="row">
+        <div class="mb-5"></div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="mb-5"></div>
+        <div class="mb-3">
+            <h1 style="text-align: center;">Mes informations</h1>
         </div>
     </div>
+    {% if errors %}
+        <div class="row justify-content-center">
+            <div class="mb-5"></div>
+            <div class="card text-white bg-danger mb-3" style="max-width: 18rem; min-width: 50%;">
+                <div class="card-body">
+                    <h5 class="card-title">Erreurs</h5>
+                    <p class="card-text">
+                        {% for error in errors %}
+                        - {{ error }}<br>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if message %}
+        <div class="row justify-content-center">
+            <div class="mb-5"></div>
+            <div class="card text-black bg-success mb-3" style="max-width: 18rem; min-width: 50%;">
+                <div class="card-body">
+                    <p class="card-text">
+                        {{ message }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8">
+            <hr class="my-3">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Nom d'utilisateur</th>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Adresse e-mail</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date de la création du compte</th>
+                        <td>{{ date_joined|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mb-5"></div>
+            <hr class="my-3">
+            <form method="post" action="/detail/">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md">
+                        <p class="fw-bold">Changement du mot de passe</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <label for="password1-input" class="visually-hidden">Ancien mot de passe</label>
+                        <input id="password1-input" type="password" class="form-control" name="old-password" placeholder="Ancien mot de passe">
+                    </div>
+                    <div class="col-md">
+                        <label for="password2-input" class="visually-hidden">Nouveau mot de passe</label>
+                        <input id="password2-input" type="password" class="form-control" name="new-password" placeholder="Nouveau mot de passe">
+                    </div>
+                    <div class="col-md">
+                        <label for="password3-input" class="visually-hidden">Répetez nouveau mot de passe</label>
+                        <input id="password3-input" type="password" class="form-control" name="new-password1" placeholder="Répétez mot de passe">
+                    </div>
+                    <div class="col-md">
+                        <button class="btn btn-primary" type="submit">Changer</button>
+                    </div>
+                </div>
+            </form>
+            <div class="mb-5"></div>
+            <hr class="my-3">
+            <form method="post" action="/delete/{{ user.pk }}/">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md">
+                        <p class="fw-bold">Suppression du compte utilisateur</p>
+                    </div>
+                    <div class="col align-self-end">
+                        <button class="btn btn-danger" type="submit">Supprimer</button>
+                    </div>
+                </div>
+            </form>
+            <div class="mb-5"></div>
+        </div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="mb-5"></div>
+        <div class="mb-3">
+            <h1 style="text-align: center;">Mes serres</h1>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="accordion" id="SerreList">
+            {% if serres is not None %}
+            {% for serre, nb, status, releve_date in list_serres %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="Serre{{ nb }}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ nb }}" aria-expanded="true" aria-controls="collapse{{ nb }}">
+                        Serre n°{{ nb }} - {{ serre.name }}
+                    </button>
+                </h2>
+                <div id="collapse{{ nb }}" class="accordion-collapse collapse" aria-labelledby="Serre{{ nb }}" data-bs-parent="#SerreList">
+                    <div class="accordion-body">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Type de culture</th>
+                                    <td>{{ serre.type_culture }}</td>
+                                    <td><a class="btn btn-primary" href="{% url 'modify-serre' serre.pk %}">Modifier la serre</a></td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td>{{ status }}</td>
+                                    <td><a class="btn btn-danger" href="#">Supprimer la serre</a></td>
+                                </tr>
+                                <tr>
+                                    <th>Date du dernier relevé</th>
+                                    <td>{{ releve_date }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Jetons d'authentification</th>
+                                    <td class="token" id="token-{{ nb }}">{{ serre.token }}</td>
+                                    <td><input class="btn btn-success ajax-gen" id="{{ nb }}" type="submit" onclick="AJAXToken(this)" value="Générer le jeton"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+
+            {% endif %}
+        </div>
+    </div>
+    <div class="mb-5"></div>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="invalidTokenToast" class="toast hide text-white bg-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+            <div class="toast-body" id="invalidTokenToastText"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+function AJAXToken(button) {
+    var token_id = "token".concat("-", button.getAttribute("id"));
+    var token = document.getElementById(token_id);
+    const xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var jsonObj = JSON.parse(this.responseText);
+            if (jsonObj.hasOwnProperty("token")) {
+                token.textContent = jsonObj.token;
+            } else if (jsonObj.hasOwnProperty("error")) {
+                var alertText = document.getElementById("invalidTokenToastText");
+                var alertToast = document.getElementById("invalidTokenToast");
+                alertText.textContent = jsonObj.error;
+                var bsAlert = new bootstrap.Toast(alertToast);
+                bsAlert.show();
+                console.log(jsonObj.error);
+            }
+        }
+    }
+    xhttp.open("GET", "/serre/update/token/".concat(token.textContent, "/"));
+    xhttp.send();
+}
 {% endblock %}
