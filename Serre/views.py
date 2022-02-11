@@ -5,6 +5,7 @@ import re
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
+from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
 
@@ -314,9 +315,9 @@ def lora_releve(request):
 
     debut = False
     for ele in context['json']['uplink_message']['decoded_payload']['brut']:
-        if ele == '#':
+        if ele == ord('#'):
             debut = True
-        if ele and debut and ele != '#':
+        if ele and debut and ele != ord('#'):
             context['str'] += chr(ele)
 
     print(context['str'])
@@ -329,7 +330,7 @@ def lora_releve(request):
         sol_humidity=(int(context['list'][2]) * 100) / 256,
         pression=int(context['list'][3]),
         luminosite=int(context['list'][4]),
-        timestamp=datetime.datetime.now(),
+        timestamp=timezone.now(),
     )
     new_releve.save()
 
