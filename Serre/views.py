@@ -299,3 +299,43 @@ def modify_serre(request, pk):
         context['serre'].save()
         return redirect("/detail/?code=1")
     return render(request, "Serre/modify-serre.html", context)
+
+
+@csrf_exempt
+def lora_releve(request):
+    context = {
+        'errors': [],
+        'json': json.loads(request.body.decode()),
+        'serre': Serre.objects.get(DeviceEUI__exact=json.loads(request.body.decode())['end_device_ids']['dev_eui']),
+        'str': ""
+    }
+    if not context['json']:
+        return HttpResponse("Données manquantes")
+
+    debut = False
+    for ele in context['json']['uplink_message']['decoded_payload']['brut']:
+        if ele == '#':
+            debut = True
+        if ele and debut and ele != '#':
+            context['str'] += chr(ele)
+
+    print(context['str'])
+    context['list'] = context['str'].split(',')
+
+    new_releve = Releves(
+        serre=context['serre'],
+        temperature=float(context['list'][0]),
+        air_humidity=float(context['list'][1]),
+        sol_humidity=(int(context['list'][2]) * 100) / 256,
+        pression=int(context['list'][3]),
+        luminosite=int(context['list'][4]),
+        timestamp=datetime.datetime.now(),
+    )
+    new_releve.save()
+
+    return HttpResponse("Relevé ajouté !")
+
+
+@csrf_exempt
+def wifi_releve(request):
+    pass

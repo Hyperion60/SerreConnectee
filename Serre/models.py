@@ -43,6 +43,7 @@ class Releves(models.Model):
     air_humidity = models.FloatField(default=0)
     sol_humidity = models.FloatField(default=0)
     luminosite = models.IntegerField(default=0)
+    pression = models.IntegerField(default=0)
     air_qualite = models.FloatField(default=0)
     accelero_x = models.FloatField(default=0)
     accelero_y = models.FloatField(default=0)
