@@ -365,6 +365,47 @@ def lora_releve(request):
 
 @csrf_exempt
 def wifi_releve(request):
-    pass
+    context = {
+        'errors': [],
+        'data': request.body.decode(),
+    }
+    # Input format : <releves>\n<token>
 
+    try:
+        data = context['data'].split('\n')[0]
+        token = context['data'].split('\n')[1]
+        context['serre'] = Serre.objects.get(token__exact=token)
+        debut = False
+        for ele in data:
+            if ele == ord('#'):
+                debut = True
+            if ele and debut and ele != ord('#'):
+                context['str'] += chr(ele)
 
+        context['list'] = context['str'].split(',')
+
+        new_releve = Releves(
+            serre=context['serre'],
+            temperature=float(context['list'][0]),
+            air_humidity=float(context['list'][1]),
+            sol_humidity=(int(context['list'][2]) * 100) / 256,
+            pression=int(context['list'][3]),
+            luminosite=int(context['list'][4]),
+            timestamp=timezone.now(),
+        )
+        new_releve.save()
+    except Serre.DoesNotExist:
+        return HttpResponse("KO - Invalid Token")
+
+    now = timezone.now()
+
+    response = "{},{},{},{},{},{},{}".format(
+        context['serre'].seuil_temp,
+        context['serre'].seuil_sol_humid,
+        context['serre'].seuil_air_humid,
+        context['serre'].seuil_lumino_value,
+        context['serre'].debut_jour.hour * 60 + context['serre'].debut_jour.minute,
+        context['serre'].fin_jour.hour * 60 + context['serre'].fin_jour.minute,
+        now.hour * 60 + now.minute,
+    )
+    return HttpResponse(response)
