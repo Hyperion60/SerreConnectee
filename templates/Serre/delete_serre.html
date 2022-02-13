@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="mb-5"></div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="mb-5"></div>
+        <div class="mb-3">
+            <h1 style="text-align: center">Suppression de la serre {{ serre.name }}</h1>
+        </div>
+    </div>
+    {% if errors %}
+    <div class="row justify-content-center">
+        <div class="mb-5"></div>
+        <div class="card text-white bg-danger mb-3" style="max-width: 18rem; min-width: 50%;">
+            <div class="card-body">
+                <h5 class="card-title">Erreurs</h5>
+                <p class="card-text">
+                    {% for error in errors %}
+                    - {{ error }}<br>
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <form method="post" action="{% url 'delete-serre' serre.pk %}">
+        {% csrf_token %}
+        <div class="mb-5"></div>
+        <div class="row justify-content-md-center">
+            <div class="col-12 col-md-8 text-center">
+                <button class="btn btn-danger" style="align-content: center" name="delete" value="yes" type="submit">Supprimer</button>
+                <button class="btn btn-primary" style="align-content: center" name="cancel" value="no" type="submit">Annuler</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -248,6 +248,10 @@ def user_detail(request):
     }
     if context['code'] == '1':
         context['message'] = "La serre a été modifiée avec succès"
+    if context['code'] == '2':
+        context['message'] = "La suppression de la serre a été annulée"
+    if context['code'] == '3':
+        context['message'] = "La serre a été supprimée avec succès"
     if request.POST:
         try:
             old_pass = request.POST['old-password']

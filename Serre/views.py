@@ -1,11 +1,13 @@
-import binascii, datetime, os
+import binascii
+import datetime
+import os
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.datastructures import MultiValueDictKeyError
 
-from Serre.models import Serre
+from Serre.models import Serre, Releves
 
 
 @login_required(login_url="/login/")
@@ -119,3 +121,29 @@ def modify_serre(request, pk):
             context['errors'].append("Le champs {} ne peut pas être vide".format(err.args[0]))
 
     return render(request, "Serre/modify-serre.html", context)
+
+
+@login_required(login_url="/login/")
+def delete_serre(request, pk):
+    context = {
+        'errors': [],
+    }
+    try:
+        context['serre'] = Serre.objects.get(pk=pk)
+        if context['serre'].user == request.user:
+            raise KeyError
+    except Serre.DoesNotExist:
+        context['errors'].append("La serre demandée n'existe pas, la clé primaire n'existe pas")
+    except KeyError:
+        context['errors'].append("Vous ne pouvez pas supprimer une serre qui ne vous appartient pas")
+
+    if not len(context['errors']) and request.POST:
+        if request.POST.get('cancel', None):
+            return redirect("/detail/?code=2")
+        else:
+            for releve in Releves.objects.filter(serre_id=context['serre'].pk):
+                releve.delete()
+            context['serre'].delete()
+            return redirect("/detail/?code=3")
+
+    return render(request, "Serre/delete_serre.html", context)
