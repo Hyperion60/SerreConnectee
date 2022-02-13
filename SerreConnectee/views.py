@@ -293,7 +293,7 @@ def user_detail(request):
                 second=releves[0].timestamp.second
             )
             releves[0].save()
-        if len(releves) and releves[0].timestamp - datetime.datetime.now() < datetime.timedelta(hours=6):
+        if len(releves) and releves[0].timestamp - timezone.now() < timezone.timedelta(hours=6):
             last = releves[0].timestamp
             context['status'].append("En ligne")
             context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(last.day,
