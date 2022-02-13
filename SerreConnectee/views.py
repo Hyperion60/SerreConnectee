@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -280,6 +281,18 @@ def user_detail(request):
     context['date'] = []
     for serre in context['serres']:
         releves = Releves.objects.filter(serre=serre).order_by('timestamp')
+        try:
+            releves[0].timestamp - datetime.datetime.now()
+        except TypeError:
+            releves[0].timestamp = timezone.datetime(
+                year=releves[0].timestamp.year,
+                month=releves[0].timestamp.month,
+                day=releves[0].timestamp.day,
+                hour=releves[0].timestamp.hour,
+                minute=releves[0].timestamp.minute,
+                second=releves[0].timestamp.second
+            )
+            releves[0].save()
         if len(releves) and releves[0].timestamp - datetime.datetime.now() < datetime.timedelta(hours=6):
             last = releves[0].timestamp
             context['status'].append("En ligne")
