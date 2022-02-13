@@ -304,6 +304,30 @@ def modify_serre(request, pk):
     return render(request, "Serre/modify-serre.html", context)
 
 
+@login_required(login_url="/login/")
+def delete_serre(request, pk):
+    context = {}
+    try:
+        context['serre'] = Serre.objects.get(pk=pk)
+        if not context['serre'].user.pk == request.user.pk:
+            raise KeyError
+    except Serre.DoesNotExist:
+        return redirect("/detail/?err=1")
+    except KeyError:
+        return redirect("/detail/?err=2")
+
+    if request.POST:
+        if request.POST.get('cancel', None):
+            return redirect("/detail/?code=2")
+        else:
+            for releve in Releves.objects.filter(serre_id=context['serre'].pk):
+                releve.delete()
+            context['serre'].delete()
+            return redirect("/detail/?code=3")
+
+    return render(request, "Serre/delete_serre.html", context)
+
+
 @csrf_exempt
 def lora_releve(request):
     context = {
@@ -343,27 +367,4 @@ def lora_releve(request):
 def wifi_releve(request):
     pass
 
-@login_required(login_url="/login/")
-def delete_serre(request, pk):
-    context = {
-        'errors': [],
-    }
-    try:
-        context['serre'] = Serre.objects.get(pk=pk)
-        if context['serre'].user == request.user:
-            raise KeyError
-    except Serre.DoesNotExist:
-        context['errors'].append("La serre demandée n'existe pas, la clé primaire n'existe pas")
-    except KeyError:
-        context['errors'].append("Vous ne pouvez pas supprimer une serre qui ne vous appartient pas")
 
-    if not len(context['errors']) and request.POST:
-        if request.POST.get('cancel', None):
-            return redirect("/detail/?code=2")
-        else:
-            for releve in Releves.objects.filter(serre_id=context['serre'].pk):
-                releve.delete()
-            context['serre'].delete()
-            return redirect("/detail/?code=3")
-
-    return render(request, "Serre/delete_serre.html", context)

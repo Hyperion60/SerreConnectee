@@ -244,7 +244,8 @@ def user_detail(request):
         'errors': [],
         'user': request.user,
         'date_joined': request.user.date_joined.replace(microsecond=0),
-        'code': request.GET.get('code', None)
+        'code': request.GET.get('code', None),
+        'err': request.GET.get('err', None),
     }
     if context['code'] == '1':
         context['message'] = "La serre a été modifiée avec succès"
@@ -252,6 +253,11 @@ def user_detail(request):
         context['message'] = "La suppression de la serre a été annulée"
     if context['code'] == '3':
         context['message'] = "La serre a été supprimée avec succès"
+    if context['err'] == '1':
+        context['errors'].append("La serre demandée est introuvable, la clé primaire est introuvable")
+    if context['err'] == '2':
+        context['errors'].append("Vous ne pouvez pas supprimer une serre qui ne vous appartient pas")
+
     if request.POST:
         try:
             old_pass = request.POST['old-password']
