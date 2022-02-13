@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -244,10 +245,20 @@ def user_detail(request):
         'errors': [],
         'user': request.user,
         'date_joined': request.user.date_joined.replace(microsecond=0),
-        'code': request.GET.get('code', None)
+        'code': request.GET.get('code', None),
+        'err': request.GET.get('err', None),
     }
     if context['code'] == '1':
         context['message'] = "La serre a été modifiée avec succès"
+    if context['code'] == '2':
+        context['message'] = "La suppression de la serre a été annulée"
+    if context['code'] == '3':
+        context['message'] = "La serre a été supprimée avec succès"
+    if context['err'] == '1':
+        context['errors'].append("La serre demandée est introuvable, la clé primaire est introuvable")
+    if context['err'] == '2':
+        context['errors'].append("Vous ne pouvez pas supprimer une serre qui ne vous appartient pas")
+
     if request.POST:
         try:
             old_pass = request.POST['old-password']
@@ -270,6 +281,18 @@ def user_detail(request):
     context['date'] = []
     for serre in context['serres']:
         releves = Releves.objects.filter(serre=serre).order_by('timestamp')
+        try:
+            releves[0].timestamp - datetime.datetime.now()
+        except TypeError:
+            releves[0].timestamp = timezone.datetime(
+                year=releves[0].timestamp.year,
+                month=releves[0].timestamp.month,
+                day=releves[0].timestamp.day,
+                hour=releves[0].timestamp.hour,
+                minute=releves[0].timestamp.minute,
+                second=releves[0].timestamp.second
+            )
+            releves[0].save()
         if len(releves) and releves[0].timestamp - datetime.datetime.now() < datetime.timedelta(hours=6):
             last = releves[0].timestamp
             context['status'].append("En ligne")

@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path
 from Serre import views
 
 
@@ -8,4 +8,5 @@ urlpatterns = [
     path('modify/<int:pk>/', views.modify_serre, name="modify-serre"),
     path('lora/add/', views.lora_releve, name="lora-add"),
     path('wifi/add/', views.wifi_releve, name="wifi-add"),
+    path('del/<int:pk>/', views.delete_serre, name="delete-serre"),
 ]

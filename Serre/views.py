@@ -1,4 +1,6 @@
-import binascii, datetime, os
+import binascii
+import datetime
+import os
 import json
 import re
 
@@ -302,6 +304,30 @@ def modify_serre(request, pk):
     return render(request, "Serre/modify-serre.html", context)
 
 
+@login_required(login_url="/login/")
+def delete_serre(request, pk):
+    context = {}
+    try:
+        context['serre'] = Serre.objects.get(pk=pk)
+        if not context['serre'].user.pk == request.user.pk:
+            raise KeyError
+    except Serre.DoesNotExist:
+        return redirect("/detail/?err=1")
+    except KeyError:
+        return redirect("/detail/?err=2")
+
+    if request.POST:
+        if request.POST.get('cancel', None):
+            return redirect("/detail/?code=2")
+        else:
+            for releve in Releves.objects.filter(serre_id=context['serre'].pk):
+                releve.delete()
+            context['serre'].delete()
+            return redirect("/detail/?code=3")
+
+    return render(request, "Serre/delete_serre.html", context)
+
+
 @csrf_exempt
 def lora_releve(request):
     context = {
@@ -339,4 +365,47 @@ def lora_releve(request):
 
 @csrf_exempt
 def wifi_releve(request):
-    pass
+    context = {
+        'errors': [],
+        'data': request.body.decode(),
+    }
+    # Input format : <releves>\n<token>
+
+    try:
+        data = context['data'].split('\n')[0]
+        token = context['data'].split('\n')[1]
+        context['serre'] = Serre.objects.get(token__exact=token)
+        debut = False
+        for ele in data:
+            if ele == ord('#'):
+                debut = True
+            if ele and debut and ele != ord('#'):
+                context['str'] += chr(ele)
+
+        context['list'] = context['str'].split(',')
+
+        new_releve = Releves(
+            serre=context['serre'],
+            temperature=float(context['list'][0]),
+            air_humidity=float(context['list'][1]),
+            sol_humidity=(int(context['list'][2]) * 100) / 256,
+            pression=int(context['list'][3]),
+            luminosite=int(context['list'][4]),
+            timestamp=timezone.now(),
+        )
+        new_releve.save()
+    except Serre.DoesNotExist:
+        return HttpResponse("KO - Invalid Token")
+
+    now = timezone.now()
+
+    response = "{},{},{},{},{},{},{}".format(
+        context['serre'].seuil_temp,
+        context['serre'].seuil_sol_humid,
+        context['serre'].seuil_air_humid,
+        context['serre'].seuil_lumino_value,
+        context['serre'].debut_jour.hour * 60 + context['serre'].debut_jour.minute,
+        context['serre'].fin_jour.hour * 60 + context['serre'].fin_jour.minute,
+        now.hour * 60 + now.minute,
+    )
+    return HttpResponse(response)
