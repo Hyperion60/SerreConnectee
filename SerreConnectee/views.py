@@ -296,10 +296,15 @@ def user_detail(request):
         if len(releves) and releves[0].timestamp - timezone.now() < timezone.timedelta(hours=6):
             last = releves[0].timestamp
             context['status'].append("En ligne")
-            context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(last.day,
+            cet_hour = last.hour
+            cet_day = last.day
+            if last.hour == 23:
+                cet_hour = 0
+                cet_day += 1
+            context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(cet_day,
                                                                                         last.month,
                                                                                         last.year,
-                                                                                        last.hour,
+                                                                                        cet_hour,
                                                                                         last.minute,
                                                                                         last.second))
         else:
