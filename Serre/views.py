@@ -373,25 +373,16 @@ def wifi_releve(request):
     # Input format : <releves>\n<token>
 
     try:
-        data = context['data'].split('\n')[0]
         token = context['data'].split('\n')[1]
-        context['serre'] = Serre.objects.get(token__exact=token)
-        debut = False
-        for ele in data:
-            if ele == ord('#'):
-                debut = True
-            if ele and debut and ele != ord('#'):
-                context['str'] += chr(ele)
-
-        context['list'] = context['str'].split(',')
+        data = context['data'].split('\n')[0].split('#')[1].split(',')
 
         new_releve = Releves(
             serre=context['serre'],
-            temperature=float(context['list'][0]),
-            air_humidity=float(context['list'][1]),
-            sol_humidity=(int(context['list'][2]) * 100) / 256,
-            pression=int(context['list'][3]),
-            luminosite=int(context['list'][4]),
+            temperature=float(data[0]),
+            air_humidity=float(data[1]),
+            sol_humidity=(int(data[2]) * 100) / 256,
+            pression=int(data[3]),
+            luminosite=int(data[4]),
             timestamp=datetime.datetime.now(pytz.timezone(TIME_ZONE)),
         )
         new_releve.save()
