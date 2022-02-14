@@ -283,35 +283,21 @@ def user_detail(request):
     context['date'] = []
     for serre in context['serres']:
         releves = Releves.objects.filter(serre=serre).order_by('-timestamp')
-        try:
-            releves[0].timestamp - datetime.datetime.now()
-        except TypeError:
-            releves[0].timestamp = timezone.datetime(
-                year=releves[0].timestamp.year,
-                month=releves[0].timestamp.month,
-                day=releves[0].timestamp.day,
-                hour=releves[0].timestamp.hour,
-                minute=releves[0].timestamp.minute,
-                second=releves[0].timestamp.second
-            )
-            releves[0].save()
-        if len(releves) and timezone.now() - releves[0].timestamp < timezone.timedelta(hours=6):
+        if len(releves):
+            context['date'].append("Jamais")
+            context['status'].append("Hors ligne")
+        else:
             last = releves[0].timestamp
-            context['status'].append("En ligne")
-            cet_hour = last.hour
-            cet_day = last.day
-            if last.hour == 23:
-                cet_hour = 0
-                cet_day += 1
-            context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(cet_day,
+            context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(last.day,
                                                                                         last.month,
                                                                                         last.year,
-                                                                                        cet_hour,
+                                                                                        last.hour,
                                                                                         last.minute,
                                                                                         last.second))
-        else:
-            context['status'].append("Hors ligne")
-            context['date'].append("Jamais")
+            if timezone.now() - releves[0].timestamp < timezone.timedelta(hours=6):
+                context['status'].append("En ligne")
+            else:
+                context['status'].append("Hors ligne")
 
     context['list_serres'] = zip(context['serres'],
                                  range(1, len(context['serres']) + 1),
