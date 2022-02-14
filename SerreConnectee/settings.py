@@ -78,7 +78,10 @@ WSGI_APPLICATION = 'SerreConnectee.wsgi.application'
 
 STATICFILES_DIRS = (BASE_DIR / "static",)
 
-SENDFILE_ROOT = "static/csv"
+if os.getenv("PRODUCTION"):
+    SENDFILE_ROOT = "/media/www/csv/"
+else:
+    SENDFILE_ROOT = "static/csv/"
 
 SENDFILE_BACKEND = "django_sendfile.backends.simple"
 
