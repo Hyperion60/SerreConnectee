@@ -282,7 +282,7 @@ def user_detail(request):
     context['status'] = []
     context['date'] = []
     for serre in context['serres']:
-        releves = Releves.objects.filter(serre=serre).order_by('timestamp')
+        releves = Releves.objects.filter(serre=serre).order_by('-timestamp')
         try:
             releves[0].timestamp - datetime.datetime.now()
         except TypeError:
@@ -295,7 +295,7 @@ def user_detail(request):
                 second=releves[0].timestamp.second
             )
             releves[0].save()
-        if len(releves) and releves[0].timestamp - timezone.now() < timezone.timedelta(hours=6):
+        if len(releves) and timezone.now() - releves[0].timestamp < timezone.timedelta(hours=6):
             last = releves[0].timestamp
             context['status'].append("En ligne")
             cet_hour = last.hour
