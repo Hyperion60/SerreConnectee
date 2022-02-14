@@ -132,6 +132,7 @@
                                 <tr>
                                     <th>Date du dernier relevé</th>
                                     <td>{{ releve_date }}</td>
+                                    <td><a class="btn btn-warning" href="{% url 'download-csv' serre.pk %}">Extraction des données CSV</a></td>
                                 </tr>
                                 <tr>
                                     <th>Jetons d'authentification</th>
