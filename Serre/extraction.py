@@ -19,14 +19,7 @@ def create_csv(serre):
             'Humidite sol': releve.sol_humidity,
             'luminosite': releve.luminosite,
             'pression': releve.pression,
-            'date': "{}/{}/{} {}:{}:{}".format(
-                releve.timestamp.year,
-                releve.timestamp.month,
-                releve.timestamp.day,
-                releve.timestamp.hour,
-                releve.timestamp.minute,
-                releve.timestamp.second
-            )
+            'date': releve.timestamp.strftime("%Y/%m/%d %H:%M:%S"),
         }
         data.append(dico)
 
