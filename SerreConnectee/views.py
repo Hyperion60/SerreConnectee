@@ -345,15 +345,6 @@ def user_delete(request, uidb64, token):
     return render(request, "User/delete.html", context)
 
 
-@csrf_exempt
-def test_arduino(request):
-    if request.POST:
-        print(request)
-        print(request.POST.content)
-    print(request.body.decode())
-    return HttpResponse("OK")
-
-
 @login_required(login_url="/login/")
 def user_ask_delete(request, pk):
     context = {
