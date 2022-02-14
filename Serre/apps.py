@@ -20,7 +20,8 @@ class SerreConfig(AppConfig):
             releves = Releves.objects.all()
             for releve in releves:
                 if releve.timestamp.tzinfo == datetime.timezone.utc:
-                    releve.timestamp.replace(hour=releve.hour + 1, tzinfo=pytz.timezone(TIME_ZONE))
+                    releve.timestamp = releve.timestamp.replace(hour=releve.timestamp.hour + 1,
+                                                                tzinfo=pytz.timezone(TIME_ZONE))
                     releve.save()
         except User.DoesNotExist:
             admin = User(username="admin", is_superuser=True, is_staff=True, is_active=True)
