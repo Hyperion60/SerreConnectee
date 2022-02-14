@@ -4,6 +4,7 @@ import os
 import json
 import re
 
+import pytz
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
@@ -11,6 +12,7 @@ from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
 
+from SerreConnectee.settings import TIME_ZONE
 from Serre.models import Serre, Releves
 
 
@@ -356,7 +358,7 @@ def lora_releve(request):
         sol_humidity=(int(context['list'][2]) * 100) / 256,
         pression=int(context['list'][3]),
         luminosite=int(context['list'][4]),
-        timestamp=timezone.now(),
+        timestamp=datetime.datetime.now(pytz.timezone(TIME_ZONE)),
     )
     new_releve.save()
 
@@ -391,13 +393,13 @@ def wifi_releve(request):
             sol_humidity=(int(context['list'][2]) * 100) / 256,
             pression=int(context['list'][3]),
             luminosite=int(context['list'][4]),
-            timestamp=timezone.now(),
+            timestamp=datetime.datetime.now(pytz.timezone(TIME_ZONE)),
         )
         new_releve.save()
     except Serre.DoesNotExist:
         return HttpResponse("KO - Invalid Token")
 
-    now = timezone.now()
+    now = datetime.datetime.now(pytz.timezone(TIME_ZONE))
 
     response = "{},{},{},{},{},{},{}".format(
         context['serre'].seuil_temp,

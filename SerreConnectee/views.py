@@ -1,5 +1,6 @@
 import datetime
 
+import pytz
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
@@ -17,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from Serre.models import Serre, Releves
 from SerreConnectee.tokens import account_activation_token
-from SerreConnectee.settings import EMAIL_HOST_USER
+from SerreConnectee.settings import EMAIL_HOST_USER, TIME_ZONE
 
 
 def __check_email(context, email):
@@ -150,7 +151,8 @@ def signup_user(request):
         if not len(context['errors']):
             new_user = User(username=context['username'],
                             email=context['email'],
-                            is_active=False)
+                            is_active=False,
+                            date_joined=datetime.datetime.now(pytz.timezone(TIME_ZONE)))
             new_user.set_password(context['password'])
             new_user.save()
             __send_verification_email(request, new_user)
