@@ -283,7 +283,7 @@ def user_detail(request):
     context['date'] = []
     for serre in context['serres']:
         releves = Releves.objects.filter(serre=serre).order_by('-timestamp')
-        if len(releves):
+        if not len(releves):
             context['date'].append("Jamais")
             context['status'].append("Hors ligne")
         else:
