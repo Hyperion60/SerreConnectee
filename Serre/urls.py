@@ -1,5 +1,5 @@
 from django.urls import path
-from Serre import views
+from Serre import views, extraction
 
 
 urlpatterns = [
@@ -9,4 +9,5 @@ urlpatterns = [
     path('lora/add/', views.lora_releve, name="lora-add"),
     path('wifi/add/', views.wifi_releve, name="wifi-add"),
     path('del/<int:pk>/', views.delete_serre, name="delete-serre"),
+    path('download/<int:pk>/', extraction.download_csv, name="download-csv"),
 ]
