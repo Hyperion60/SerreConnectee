@@ -11,6 +11,6 @@ python mange.py migrate Serre
 
 mv /tmp/apps.py Serre/apps.py
 
-python manage.py collectstatic
+python manage.py collectstatic --noinput
 
 uwsgi --ini "/home/django/deploiements/settings.ini"

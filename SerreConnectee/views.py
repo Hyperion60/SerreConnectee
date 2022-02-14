@@ -1,5 +1,6 @@
 import datetime
 
+import pytz
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
@@ -17,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from Serre.models import Serre, Releves
 from SerreConnectee.tokens import account_activation_token
-from SerreConnectee.settings import EMAIL_HOST_USER
+from SerreConnectee.settings import EMAIL_HOST_USER, TIME_ZONE
 
 
 def __check_email(context, email):
@@ -150,7 +151,8 @@ def signup_user(request):
         if not len(context['errors']):
             new_user = User(username=context['username'],
                             email=context['email'],
-                            is_active=False)
+                            is_active=False,
+                            date_joined=datetime.datetime.now(pytz.timezone(TIME_ZONE)))
             new_user.set_password(context['password'])
             new_user.save()
             __send_verification_email(request, new_user)
@@ -296,10 +298,15 @@ def user_detail(request):
         if len(releves) and releves[0].timestamp - timezone.now() < timezone.timedelta(hours=6):
             last = releves[0].timestamp
             context['status'].append("En ligne")
-            context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(last.day,
+            cet_hour = last.hour
+            cet_day = last.day
+            if last.hour == 23:
+                cet_hour = 0
+                cet_day += 1
+            context['date'].append("{:02d}/{:02d}/{:04d} - {:02d}:{:02d}:{:02d}".format(cet_day,
                                                                                         last.month,
                                                                                         last.year,
-                                                                                        last.hour,
+                                                                                        cet_hour,
                                                                                         last.minute,
                                                                                         last.second))
         else:
@@ -338,15 +345,6 @@ def user_delete(request, uidb64, token):
             context['errors'].append("Le lien est invalide, recommencez la procédure")
 
     return render(request, "User/delete.html", context)
-
-
-@csrf_exempt
-def test_arduino(request):
-    if request.POST:
-        print(request)
-        print(request.POST.content)
-    print(request.body.decode())
-    return HttpResponse("OK")
 
 
 @login_required(login_url="/login/")
