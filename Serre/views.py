@@ -389,6 +389,8 @@ def wifi_releve(request):
         new_releve.save()
     except Serre.DoesNotExist:
         return HttpResponse("KO - Invalid Token")
+    except IndexError:
+        return HttpResponse("KO - Invalid Format")
 
     now = datetime.datetime.now(pytz.timezone(TIME_ZONE))
 
