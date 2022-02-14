@@ -374,6 +374,7 @@ def wifi_releve(request):
 
     try:
         token = context['data'].split('\n')[1]
+        context['serre'] = Serre.objects.get(token=token)
         data = context['data'].split('\n')[0].split('#')[1].split(',')
 
         new_releve = Releves(
