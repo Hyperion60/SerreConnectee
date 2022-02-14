@@ -78,6 +78,9 @@ WSGI_APPLICATION = 'SerreConnectee.wsgi.application'
 
 STATICFILES_DIRS = (BASE_DIR / "static",)
 
+SENDFILE_ROOT = "static/csv"
+
+SENDFILE_BACKEND = "django_sendfile.backends.simple"
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases

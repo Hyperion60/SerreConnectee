@@ -148,8 +148,13 @@
                         <div class="input-group mb-3">
                             <span class="input-group-text material-icons">fingerprint</span>
                             <span class="input-group-text" id="devuid-addon">Device EUID LoRa (optionnel)</span>
+                            {% if serre.DeviceEUI is not None %}
                             <input type="text" class="form-control" id="dev-eui-value-input" name="dev-eui"
                                    placeholder="70B5E57ED0046B56" value="{{ serre.DeviceEUI }}">
+                            {% else %}
+                            <input type="text" class="form-control" id="dev-eui-value-input" name="dev-eui"
+                                   placeholder="70B5E57ED0046B56">
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -158,8 +163,13 @@
                         <div class="input-group mb-3">
                             <span class="input-group-text material-icons">import_contacts</span>
                             <span class="input-group-text" id="devadr-addon">Device Address</span>
+                            {% if serre.DevAddr is not None %}
                             <input type="text" class="form-control" id="dev-adr-value-input" name="dev-adr"
                                    placeholder="260B2F65" value="{{ serre.DevAddr }}">
+                            {% else %}
+                            <input type="text" class="form-control" id="dev-adr-value-input" name="dev-adr"
+                                   placeholder="260B2F65">
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -168,8 +178,13 @@
                         <div class="input-group mb-3">
                             <span class="input-group-text material-icons">vpn_key</span>
                             <span class="input-group-text" id="nwkskey-addon">Clé de Session Réseau (NwkSKey)</span>
+                            {% if serre.NetworkSKey is not None %}
                             <input type="text" class="form-control" id="nwkskey-value-input" name="nwkskey"
                                    placeholder="0x34, 0xE7, 0x78, ... (format MSB)" value="{{ serre.NetworkSKey }}">
+                            {% else %}
+                            <input type="text" class="form-control" id="nwkskey-value-input" name="nwkskey"
+                                   placeholder="0x34, 0xE7, 0x78, ... (format MSB)">
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -179,8 +194,13 @@
                             <span class="input-group-text material-icons">vpn_key</span>
                             <span class="input-group-text"
                                   id="appskey-addon">Clé de Session Applicative (AppSKey)</span>
+                            {% if serre.AppSKey is not None %}
                             <input type="text" class="form-control" id="appskey-value-input" name="appskey"
                                    placeholder="0xDF, 0xB2, 0x7B, ... (Format MSB)" value="{{ serre.AppSKey }}">
+                            {% else %}
+                            <input type="text" class="form-control" id="appskey-value-input" name="appskey"
+                                   placeholder="0xDF, 0xB2, 0x7B, ... (Format MSB)">
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -199,8 +219,13 @@
                             <span class="input-group-text material-icons">wifi</span>
                             <span class="input-group-text"
                                   id="appskey-addon">Nom du réseau (SSID)</span>
+                            {% if serre.ssid is not None %}
                             <input type="text" class="form-control" id="wifi-name-input" name="wifi-name"
                                    placeholder="SFR_B890" value="{{ serre.ssid }}">
+                            {% else %}
+                            <input type="text" class="form-control" id="wifi-name-input" name="wifi-name"
+                                   placeholder="SFR_B890">
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -220,8 +245,13 @@
                                         <span class="input-group-text material-icons">vpn_key</span>
                                         <span class="input-group-text"
                                               id="appskey-addon">Mot de passe Wifi</span>
+                                        {% if serre.password_wpa is not None %}
                                         <input type="password" class="form-control" id="wpa-key-input" name="wpa-key"
                                                placeholder="Mot de passe Wifi" value="{{ serre.password_wpa }}">
+                                        {% else %}
+                                        <input type="password" class="form-control" id="wpa-key-input" name="wpa-key"
+                                               placeholder="Mot de passe Wifi">
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -240,15 +270,25 @@
                                         <span class="input-group-text material-icons">badge</span>
                                         <span class="input-group-text"
                                               id="appskey-addon">Identifiant</span>
+                                        {% if serre.login_peap is not None %}
                                         <input type="text" class="form-control" id="peap-id-input" name="peap-id"
                                                placeholder="prenom.nom@unilasalle.fr" value="{{ serre.login_peap }}">
+                                        {% else %}
+                                        <input type="text" class="form-control" id="peap-id-input" name="peap-id"
+                                               placeholder="prenom.nom@unilasalle.fr">
+                                        {% endif %}
                                     </div>
                                     <div class="input-group mb-3">
                                         <span class="input-group-text material-icons">vpn_key</span>
                                         <span class="input-group-text"
                                               id="appskey-addon">Mot de passe</span>
+                                        {% if serre.password_peap is not None %}
                                         <input type="password" class="form-control" id="peap-key-input" name="peap-key"
                                                placeholder="Mot de passe" value="{{ serre.password_peap }}">
+                                        {% else %}
+                                        <input type="password" class="form-control" id="peap-key-input" name="peap-key"
+                                               placeholder="Mot de passe">
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

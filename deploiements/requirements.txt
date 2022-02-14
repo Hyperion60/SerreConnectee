@@ -5,3 +5,4 @@ simple-otp==0.1.*
 six == 1.16.*
 python-dotenv == 0.19.*
 pytz == 2021.*
+django_sendfile2 == 0.6.*
