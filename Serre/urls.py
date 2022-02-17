@@ -10,4 +10,5 @@ urlpatterns = [
     path('wifi/add/', views.wifi_releve, name="wifi-add"),
     path('del/<int:pk>/', views.delete_serre, name="delete-serre"),
     path('download/<int:pk>/', extraction.download_csv, name="download-csv"),
+    path('get/<int:pk>/', extraction.get_releve, name="get-json"),
 ]
