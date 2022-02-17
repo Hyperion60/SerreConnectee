@@ -3,11 +3,14 @@ import os
 import time
 from django.http import JsonResponse
 from django_sendfile import sendfile
+from django.views.decorators.cache import cache_page
+
 import Serre.views
 from SerreConnectee.settings import STATIC_ROOT
 from Serre.models import Releves, Serre
 
 
+# create_csv(Serre serre)
 def create_csv(serre):
     headers = ['id', 'Temperature', 'Humidite air', 'Humidite sol', 'luminosite', 'pression', 'date']
     data = []
@@ -40,6 +43,7 @@ def create_csv(serre):
     return "data_{}.csv".format(serre.pk)
 
 
+# download_csv(Request request, int pk)
 def download_csv(request, pk):
     try:
         serre = Serre.objects.get(pk=pk)
@@ -48,3 +52,29 @@ def download_csv(request, pk):
 
     path_csv = create_csv(serre)
     return sendfile(request, path_csv, True, path_csv, "text/csv")
+
+
+# create_json(Serre serre)
+def create_json(serre):
+    releves = []
+    for releve in Releves.objects.filter(serre__pk=serre.pk):
+        releves.append({
+            'time': releve.timestamp.strftime("%d/%m/%Y %H:%M"),
+            'temp': releve.temperature,
+            'air': releve.air_humidity,
+            'sol': releve.sol_humidity,
+            'light': releve.luminosite,
+            'pres': releve.pression,
+        })
+    return releves
+
+
+@cache_page(60 * 3)
+def get_releve(request, pk):
+    context = {}
+    try:
+        context['serre'] = Serre.objects.get(pk=pk)
+    except Serre.DoesNotExist:
+        return JsonResponse(request, {'error': "La serre demandée n'existe pas"})
+
+    return JsonResponse(request, {'data': create_json(context['serre'])})
