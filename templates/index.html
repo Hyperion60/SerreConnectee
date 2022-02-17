@@ -24,15 +24,16 @@
                 <div class="row">
                     <div class="col-4">
                         <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action active"aria-current="true">Température</a>
-                            <a href="#" class="list-group-item list-group-item-action" aria-current="true">Humidité</a>
-                            <a href="#" class="list-group-item list-group-item-action" aria-current="true">Luminosité</a>
-                            <a href="#" class="list-group-item list-group-item-action" aria-current="true">Pression</a>
+                            <a href="#" id="temp1" class="list-group-item list-group-item-action active"aria-current="true" onclick="changeChart(this)">Température</a>
+                            <a href="#" id="hygro1" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this)">Humidité</a>
+                            <a href="#" id="lumino1" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this)">Luminosité</a>
+                            <a href="#" id="pres1" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this)">Pression</a>
                         </div>
                     </div>
-                    <div id="graph" class="col-8 graph" style="min-height: 60vh;">
-
-                    </div>
+                    <div class="col-8 graph1-temp" id="graph1-temp" style="min-height: 60vh; display: null;"></div>
+                    <div class="col-8 graph1-hygro" id="graph1-hygro" style="min-height: 60vh; display: none;"></div>
+                    <div class="col-8 graph1-lumino" id="graph1-lumino" style="min-height: 60vh; display: none"></div>
+                    <div class="col-8 graph1-pres" id="graph1-pres" style="min-height: 60vh; display: none;"></div>
                 </div>
             </span>
         </div>
@@ -45,10 +46,32 @@
 <script src="https://code.highcharts.com/stock/modules/data.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 <script>
+    function updateActive(element, index, array) {
+        if (element.hasChildNodes()) {
+            if (element.classList.contains('active')) {
+                element.classList.remove('active');
+            }
+            const number = element.attributes.id.nodeValue;
+            var graph = document.getElementById("graph".concat("1", "-", number.slice(0, -1)));
+            if (graph !== null) {
+                graph.style.display = "none";
+            }
+        }
+    }
+
+    function changeChart(button) {
+        var parentButton = button.parentNode;
+        parentButton.childNodes.forEach(updateActive);
+        button.classList.add('active');
+        const number = button.attributes.id.nodeValue;
+        const graph = document.getElementById("graph".concat("1", "-", number.slice(0, -1)));
+        graph.style.display = null;
+    }
+
     const xhttp = new XMLHttpRequest();
     function getSerre(pk, serre) {
         var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-        var address = "/serre/get/".concat(pk, "/");
+        var address = "http://{{ request.get_host }}/serre/get/".concat(pk, "/");
         var reqType = "GET";
 
         xhttp.open(reqType, address, false);
@@ -56,14 +79,12 @@
             console.log(e);
             if (xhttp.readyState === 4 && xhttp.status === 200) {
                 serre = JSON.parse(xhttp.responseText);
-                console.log(serre);
             }
         };
         xhttp.onerror = function (e) {
             console.error(xhttp.statusText);
         };
         xhttp.send(null);
-        console.log(serre);
         return serre;
     }
 
@@ -74,7 +95,7 @@
 
     Highcharts.stockChart({
         chart: {
-            renderTo: 'graph'
+            renderTo: 'graph1-temp'
         },
 
         title: {
@@ -120,13 +141,319 @@
             }
         },
         tooltip: {
-
-            pointFormat: 'Température : {point.y:.1f}°C',
+            useHTML: true,
+            headerFormat: '<table><tr><th colspan="2">{point.key}</th></tr>',
+            pointFormat: '<tr><td style="color: {series.color}">{series.name} </td>' +
+                         '<td style="text-align: right"><b>{point.y:.1f}°C</b></td></tr>',
+            footerFormat: '</table>',
             crosshairs: [true]
         },
         series: [{
+            name: 'Température',
             color: '#5b9bd5',
             data: serre[0]['data'],
+            label: {
+                enabled: false
+            }
+        }],
+        rangeSelector: {
+            allButtonsEnabled: true,
+            buttons: [
+                {
+                    type: 'hour',
+                    count: 1,
+                    text: '1h',
+                    title: 'Dernière heure'
+                },
+                {
+                    type: 'hour',
+                    count: 3,
+                    text: '3h',
+                    title: '3 dernières heures'
+                },
+                {
+                    type: 'day',
+                    count: 1,
+                    text: '1j',
+                    title: '24 dernières heures'
+                },
+                {
+                    type: 'week',
+                    count: 1,
+                    text: '1sem',
+                    title: '7 derniers jours'
+                },
+                {
+                    type: 'all',
+                    text: 'Tous',
+                    title: 'Tous'
+                }
+            ]
+        }
+    });
+    Highcharts.stockChart({
+        chart: {
+            renderTo: 'graph1-hygro'
+        },
+
+        title: {
+            text: 'Hygrométrie'
+        },
+
+        xAxis: {
+            type: "datetime",
+            title: {
+                text: "Temps"
+            },
+            labels: {
+                formatter: function() {
+                    return Highcharts.dateFormat('%d/%m/%Y %H:%M', this.value);
+                }
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Hygrométrie (%)'
+            },
+            labels: {
+                format: '{value:,.1f}'
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        plotOptions: {
+            spline: {
+                dataLabels: {
+                    enabled: true,
+                    style: {
+                        fontSize: '10px',
+                        fontWeight: 'normal'
+                    },
+                    format: '{point.y:.1f}'
+                },
+                marker: {
+                    enabled: false,
+                },
+                enableMouseTracking: true
+            }
+        },
+        tooltip: {
+            useHTML: true,
+            headerFormat: '<table><tr><th colspan="2">{point.key}</th></tr>',
+            pointFormat: '<tr><td style="color: {series.color}">{series.name} </td>' +
+                         '<td style="text-align: right"><b>{point.y:.1f} %</b></td></tr>',
+            footerFormat: '</table>',
+            crosshairs: [true]
+        },
+        series: [{
+            name: "Hygrométrie air",
+            color: '#67d55b',
+            data: serre[1]['data'],
+            label: {
+                enabled: false
+            }
+        },{
+            name: "Hygrométrie sol",
+            color: '#375ee7',
+            data: serre[2]['data'],
+            label: {
+                enabled: false
+            }
+        }
+        ],
+        rangeSelector: {
+            allButtonsEnabled: true,
+            buttons: [
+                {
+                    type: 'hour',
+                    count: 1,
+                    text: '1h',
+                    title: 'Dernière heure'
+                },
+                {
+                    type: 'hour',
+                    count: 3,
+                    text: '3h',
+                    title: '3 dernières heures'
+                },
+                {
+                    type: 'day',
+                    count: 1,
+                    text: '1j',
+                    title: '24 dernières heures'
+                },
+                {
+                    type: 'week',
+                    count: 1,
+                    text: '1sem',
+                    title: '7 derniers jours'
+                },
+                {
+                    type: 'all',
+                    text: 'Tous',
+                    title: 'Tous'
+                }
+            ]
+        }
+    });
+    Highcharts.stockChart({
+        chart: {
+            renderTo: 'graph1-lumino'
+        },
+
+        title: {
+            text: 'Luminosité'
+        },
+
+        xAxis: {
+            type: "datetime",
+            title: {
+                text: "Temps"
+            },
+            labels: {
+                formatter: function() {
+                    return Highcharts.dateFormat('%d/%m/%Y %H:%M', this.value);
+                }
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Luminosité (lux)'
+            },
+            labels: {
+                format: '{value:,.0f}'
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        plotOptions: {
+            spline: {
+                dataLabels: {
+                    enabled: true,
+                    style: {
+                        fontSize: '10px',
+                        fontWeight: 'normal'
+                    },
+                    format: '{point.y:.1f}'
+                },
+                marker: {
+                    enabled: false,
+                },
+                enableMouseTracking: true
+            }
+        },
+        tooltip: {
+            useHTML: true,
+            headerFormat: '<table><tr><th colspan="2">{point.key}</th></tr>',
+            pointFormat: '<tr><td style="color: {series.color}">{series.name} </td>' +
+                         '<td style="text-align: right"><b>{point.y:.1f} Lux</b></td></tr>',
+            footerFormat: '</table>',
+            crosshairs: [true]
+        },
+        series: [{
+            name: 'Luminosité',
+            color: '#f84d12',
+            data: serre[3]['data'],
+            label: {
+                enabled: false
+            }
+        }],
+        rangeSelector: {
+            allButtonsEnabled: true,
+            buttons: [
+                {
+                    type: 'hour',
+                    count: 1,
+                    text: '1h',
+                    title: 'Dernière heure'
+                },
+                {
+                    type: 'hour',
+                    count: 3,
+                    text: '3h',
+                    title: '3 dernières heures'
+                },
+                {
+                    type: 'day',
+                    count: 1,
+                    text: '1j',
+                    title: '24 dernières heures'
+                },
+                {
+                    type: 'week',
+                    count: 1,
+                    text: '1sem',
+                    title: '7 derniers jours'
+                },
+                {
+                    type: 'all',
+                    text: 'Tous',
+                    title: 'Tous'
+                }
+            ]
+        }
+    });
+    Highcharts.stockChart({
+        chart: {
+            renderTo: 'graph1-pres'
+        },
+
+        title: {
+            text: 'Pression atmosphérique'
+        },
+
+        xAxis: {
+            type: "datetime",
+            title: {
+                text: "Temps"
+            },
+            labels: {
+                formatter: function() {
+                    return Highcharts.dateFormat('%d/%m/%Y %H:%M', this.value);
+                }
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Pression (Pascal)'
+            },
+            labels: {
+                format: '{value:,.0f}'
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        plotOptions: {
+            spline: {
+                dataLabels: {
+                    enabled: true,
+                    style: {
+                        fontSize: '10px',
+                        fontWeight: 'normal'
+                    },
+                    format: '{point.y:.1f}'
+                },
+                marker: {
+                    enabled: false,
+                },
+                enableMouseTracking: true
+            }
+        },
+        tooltip: {
+            useHTML: true,
+            headerFormat: '<table><tr><th colspan="2">{point.key}</th></tr>',
+            pointFormat: '<tr><td style="color: {series.color}">{series.name} </td>' +
+                         '<td style="text-align: right"><b>{point.y:.1f} Pascal</b></td></tr>',
+            footerFormat: '</table>',
+            crosshairs: [true]
+        },
+        series: [{
+            name: 'Pression',
+            color: '#11ee5f',
+            data: serre[4]['data'],
             label: {
                 enabled: false
             }
