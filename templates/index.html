@@ -5,20 +5,166 @@
             <div class="mb-5"></div>
         </div>
         {% if message %}
-        <div class="row justify-content-center">
-            <div class="mb-5"></div>
-            <div class="card text-black bg-success mb-3" style="max-width: 18rem; min-width: 50%;">
-                <div class="card-body">
-                    <p>{{ message }}</p>
+            <div class="row justify-content-center">
+                <div class="mb-5"></div>
+                <div class="card text-black bg-success mb-3" style="max-width: 18rem; min-width: 50%;">
+                    <div class="card-body">
+                        <p>{{ message }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
         {% endif %}
-        <div class="row justify-content-md-center">
-            <div class="mb-5"></div>
-            <div class="mb-3">
-                <h1>Accueil du site</h1>
-            </div>
+        <div class="row justify-content-md-center" style="min-height: 75vh; ">
+            <span class="border">
+                <div class="mb-5 center-block">
+                    <div class="flex-center">
+                        <h2 style="align-content: center">Ma Super Serre</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action active"aria-current="true">Température</a>
+                            <a href="#" class="list-group-item list-group-item-action" aria-current="true">Humidité</a>
+                            <a href="#" class="list-group-item list-group-item-action" aria-current="true">Luminosité</a>
+                            <a href="#" class="list-group-item list-group-item-action" aria-current="true">Pression</a>
+                        </div>
+                    </div>
+                    <div id="graph" class="col-8 graph" style="min-height: 60vh;">
+
+                    </div>
+                </div>
+            </span>
         </div>
     </div>
+{% endblock %}
+{% block script %}
+</script>
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/boost.js"></script>
+<script src="https://code.highcharts.com/stock/modules/data.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script>
+    const xhttp = new XMLHttpRequest();
+    function getSerre(pk, serre) {
+        var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+        var address = "/serre/get/".concat(pk, "/");
+        var reqType = "GET";
+
+        xhttp.open(reqType, address, false);
+        xhttp.onload = function (e) {
+            console.log(e);
+            if (xhttp.readyState === 4 && xhttp.status === 200) {
+                serre = JSON.parse(xhttp.responseText);
+                console.log(serre);
+            }
+        };
+        xhttp.onerror = function (e) {
+            console.error(xhttp.statusText);
+        };
+        xhttp.send(null);
+        console.log(serre);
+        return serre;
+    }
+
+    var serre;
+    serre = getSerre("1", serre);
+
+    console.log(serre);
+
+    Highcharts.stockChart({
+        chart: {
+            renderTo: 'graph'
+        },
+
+        title: {
+            text: 'Température'
+        },
+
+        xAxis: {
+            type: "datetime",
+            title: {
+                text: "Temps"
+            },
+            labels: {
+                formatter: function() {
+                    return Highcharts.dateFormat('%d/%m/%Y %H:%M', this.value);
+                }
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Température (°C)'
+            },
+            labels: {
+                format: '{value:,.1f}'
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        plotOptions: {
+            spline: {
+                dataLabels: {
+                    enabled: true,
+                    style: {
+                        fontSize: '10px',
+                        fontWeight: 'normal'
+                    },
+                    format: '{point.y:.1f}'
+                },
+                marker: {
+                    enabled: false,
+                },
+                enableMouseTracking: true
+            }
+        },
+        tooltip: {
+
+            pointFormat: 'Température : {point.y:.1f}°C',
+            crosshairs: [true]
+        },
+        series: [{
+            color: '#5b9bd5',
+            data: serre[0]['data'],
+            label: {
+                enabled: false
+            }
+        }],
+        rangeSelector: {
+            allButtonsEnabled: true,
+            buttons: [
+                {
+                    type: 'hour',
+                    count: 1,
+                    text: '1h',
+                    title: 'Dernière heure'
+                },
+                {
+                    type: 'hour',
+                    count: 3,
+                    text: '3h',
+                    title: '3 dernières heures'
+                },
+                {
+                    type: 'day',
+                    count: 1,
+                    text: '1j',
+                    title: '24 dernières heures'
+                },
+                {
+                    type: 'week',
+                    count: 1,
+                    text: '1sem',
+                    title: '7 derniers jours'
+                },
+                {
+                    type: 'all',
+                    text: 'Tous',
+                    title: 'Tous'
+                }
+            ]
+        }
+    });
+
 {% endblock %}

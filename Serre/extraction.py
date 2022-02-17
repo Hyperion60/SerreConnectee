@@ -1,13 +1,18 @@
 import csv
+import datetime
+import json
 import os
 import time
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django_sendfile import sendfile
-from django.views.decorators.cache import cache_page
 
 import Serre.views
 from SerreConnectee.settings import STATIC_ROOT
 from Serre.models import Releves, Serre
+
+
+def __getUTCJS__(timestamp, epoch=datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)):
+    return int((timestamp - epoch).total_seconds() * 1000)
 
 
 # create_csv(Serre serre)
@@ -56,20 +61,40 @@ def download_csv(request, pk):
 
 # create_json(Serre serre)
 def create_json(serre):
-    releves = []
-    for releve in Releves.objects.filter(serre__pk=serre.pk):
-        releves.append({
-            'time': releve.timestamp.strftime("%d/%m/%Y %H:%M"),
-            'temp': releve.temperature,
-            'air': releve.air_humidity,
-            'sol': releve.sol_humidity,
-            'light': releve.luminosite,
-            'pres': releve.pression,
-        })
+    releves = [
+        {
+            'name': 'Temperature',
+            'data': [],
+        },
+        {
+            'name': 'Hygrometrie de l\'air',
+            'data': [],
+        },
+        {
+            'name': 'Hygrometrie du sol',
+            'data': [],
+        },
+        {
+            'name': 'Luminosite',
+            'data': [],
+        },
+        {
+            'name': 'Pression atmospherique',
+            'data': [],
+        }
+    ]
+
+    for releve in Releves.objects.filter(serre__pk=serre.pk).order_by('timestamp'):
+        ts = __getUTCJS__(releve.timestamp)
+        releves[0]['data'].append([ts, releve.temperature])
+        releves[1]['data'].append([ts, releve.air_humidity])
+        releves[2]['data'].append([ts, releve.sol_humidity])
+        releves[3]['data'].append([ts, releve.luminosite])
+        releves[4]['data'].append([ts, releve.pression])
+
     return releves
 
 
-@cache_page(60 * 3)
 def get_releve(request, pk):
     context = {}
     try:
@@ -77,4 +102,6 @@ def get_releve(request, pk):
     except Serre.DoesNotExist:
         return JsonResponse(request, {'error': "La serre demandée n'existe pas"})
 
-    return JsonResponse(request, {'data': create_json(context['serre'])})
+    data = create_json(context['serre'])
+    data = json.dumps(data)
+    return HttpResponse(data)
