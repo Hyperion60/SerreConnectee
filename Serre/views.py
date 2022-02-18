@@ -346,9 +346,13 @@ def lora_releve(request):
             debut = True
         if ele and debut and ele != ord('#'):
             context['str'] += chr(ele)
-
-    print(context['str'])
     context['list'] = context['str'].split(',')
+
+    # Check duplicata between wifi and lora
+    list_releve = Releves.objects.filter(serre=context['serre']).order_by('-timestamp')
+    now = datetime.datetime.now(pytz.timezone(TIME_ZONE)) + datetime.timedelta(hours=1)
+    if (list_releve[0].timestamp - now).total_seconds() <= 60:
+        return HttpResponse("Relevé reçu")
 
     new_releve = Releves(
         serre=context['serre'],
@@ -357,7 +361,7 @@ def lora_releve(request):
         sol_humidity=(int(context['list'][2]) * 100) / 256,
         pression=int(context['list'][3]),
         luminosite=int(context['list'][4]),
-        timestamp=datetime.datetime.now(pytz.timezone(TIME_ZONE)),
+        timestamp=now,
     )
     new_releve.save()
 
@@ -377,16 +381,20 @@ def wifi_releve(request):
         context['serre'] = Serre.objects.get(token=token)
         data = context['data'].split('\n')[0].split('#')[1].split(',')
 
-        new_releve = Releves(
-            serre=context['serre'],
-            temperature=float(data[0]),
-            air_humidity=float(data[1]),
-            sol_humidity=(int(data[2]) * 100) / 256,
-            pression=int(data[3]),
-            luminosite=int(data[4]),
-            timestamp=datetime.datetime.now(pytz.timezone(TIME_ZONE)) + datetime.timedelta(hours=1),
-        )
-        new_releve.save()
+        # Check duplicata between wifi and lora
+        list_releve = Releves.objects.filter(serre=context['serre']).order_by('-timestamp')
+        now = datetime.datetime.now(pytz.timezone(TIME_ZONE)) + datetime.timedelta(hours=1)
+        if not len(list_releve) or (list_releve[0].timestamp - now).total_seconds() > 60:
+            new_releve = Releves(
+                serre=context['serre'],
+                temperature=float(data[0]),
+                air_humidity=float(data[1]),
+                sol_humidity=(int(data[2]) * 100) / 256,
+                pression=int(data[3]),
+                luminosite=int(data[4]),
+                timestamp=datetime.datetime.now(pytz.timezone(TIME_ZONE)) + datetime.timedelta(hours=1),
+            )
+            new_releve.save()
     except Serre.DoesNotExist:
         return HttpResponse("KO - Invalid Token")
     except IndexError:

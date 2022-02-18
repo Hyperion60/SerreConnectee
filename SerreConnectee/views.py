@@ -84,6 +84,8 @@ def index(request):
         context['message'] = "Un email de validation vient de vous être envoyé pour confirmer la suppression"
     elif request.GET.get('code', '') == '5':
         context['message'] = "La serre a été créée avec succès"
+
+    context['serres'] = Serre.objects.all().order_by('pk')
     return render(request, "index.html", context)
 
 
