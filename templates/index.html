@@ -14,65 +14,67 @@
                 </div>
             </div>
         {% endif %}
+        {% for serre in serres %}
         <div class="row justify-content-md-center" style="min-height: 75vh; ">
-            <span class="border">
+            <span class="border border-success border-2" id="border{{ serre.pk }}">
                 <div class="mb-5 center-block">
-                    <div class="flex-center">
-                        <h2 style="align-content: center">Ma Super Serre</h2>
-                    </div>
+                    <h2 style="text-align: center">{{ serre.name }}</h2>
                 </div>
                 <div class="row">
                     <div class="col-4">
                         <div class="list-group">
-                            <a href="#" id="temp1" class="list-group-item list-group-item-action active"aria-current="true" onclick="changeChart(this)">Température</a>
-                            <a href="#" id="hygro1" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this)">Humidité</a>
-                            <a href="#" id="lumino1" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this)">Luminosité</a>
-                            <a href="#" id="pres1" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this)">Pression</a>
+                            <a id="temp{{ serre.pk }}" class="list-group-item list-group-item-action active"aria-current="true" onclick="changeChart(this, {{ serre.pk }})">Température</a>
+                            <a id="hygro{{ serre.pk }}" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this, {{ serre.pk }})">Humidité</a>
+                            <a id="lumino{{ serre.pk }}" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this, {{ serre.pk }})">Luminosité</a>
+                            <a id="pres{{ serre.pk }}" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this, {{ serre.pk }})">Pression</a>
                         </div>
                     </div>
-                    <div class="col-8 graph1-temp" id="graph1-temp" style="min-height: 60vh; display: null;"></div>
-                    <div class="col-8 graph1-hygro" id="graph1-hygro" style="min-height: 60vh; display: none;"></div>
-                    <div class="col-8 graph1-lumino" id="graph1-lumino" style="min-height: 60vh; display: none"></div>
-                    <div class="col-8 graph1-pres" id="graph1-pres" style="min-height: 60vh; display: none;"></div>
+                    <div class="col-8 graph{{ serre.pk }}-temp" id="graph{{ serre.pk }}-temp" style="min-height: 60vh; display: null;"></div>
+                    <div class="col-8 graph{{ serre.pk }}-hygro" id="graph{{ serre.pk }}-hygro" style="min-height: 60vh; display: none;"></div>
+                    <div class="col-8 graph{{ serre.pk }}-lumino" id="graph{{ serre.pk }}-lumino" style="min-height: 60vh; display: none"></div>
+                    <div class="col-8 graph{{ serre.pk }}-pres" id="graph{{ serre.pk }}-pres" style="min-height: 60vh; display: none;"></div>
                 </div>
             </span>
         </div>
+        <div class="mb-1"></div>
+        {% endfor %}
     </div>
 {% endblock %}
 {% block script %}
 </script>
-<script src="https://code.highcharts.com/stock/highstock.js"></script>
-<script src="https://code.highcharts.com/stock/modules/boost.js"></script>
-<script src="https://code.highcharts.com/stock/modules/data.js"></script>
-<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script src="/static/serre/js/highstock.js"></script>
+<script src="/static/serre/js/boost.js"></script>
+<script src="/static/serre/js/data.js"></script>
+<script src="/static/serre/js/exporting.js"></script>
 <script>
-    function updateActive(element, index, array) {
+    function updateActive(pk, element) {
         if (element.hasChildNodes()) {
             if (element.classList.contains('active')) {
                 element.classList.remove('active');
             }
             const number = element.attributes.id.nodeValue;
-            var graph = document.getElementById("graph".concat("1", "-", number.slice(0, -1)));
+            let graph = document.getElementById("graph".concat(pk, "-", number.slice(0, -1)));
             if (graph !== null) {
                 graph.style.display = "none";
             }
         }
     }
 
-    function changeChart(button) {
-        var parentButton = button.parentNode;
-        parentButton.childNodes.forEach(updateActive);
+    function changeChart(button, pk) {
+        let parentButton = button.parentNode;
+        parentButton.childNodes.forEach(updateActive.bind(null, pk));
         button.classList.add('active');
         const number = button.attributes.id.nodeValue;
-        const graph = document.getElementById("graph".concat("1", "-", number.slice(0, -1)));
+        console.log("button(id): " + number);
+        let graph = document.getElementById("graph".concat(pk, "-", number.slice(0, -1)));
         graph.style.display = null;
     }
 
-    const xhttp = new XMLHttpRequest();
+    let xhttp = new XMLHttpRequest();
     function getSerre(pk, serre) {
-        var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-        var address = "http://{{ request.get_host }}/serre/get/".concat(pk, "/");
-        var reqType = "GET";
+        xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+        const address = "http://{{ request.get_host }}/serre/get/".concat(pk, "/");
+        const reqType = "GET";
 
         xhttp.open(reqType, address, false);
         xhttp.onload = function (e) {
@@ -88,14 +90,18 @@
         return serre;
     }
 
-    var serre;
-    serre = getSerre("1", serre);
-
-    console.log(serre);
-
+    {% for serre in serres %}
+    var serre{{ serre.pk }};
+    serre{{ serre.pk }} = getSerre("{{ serre.pk }}", serre{{ serre.pk }});
+    if (serre{{ serre.pk }}[0]['data'].length === 0) {
+        let container = document.getElementById('border{{ serre.pk }}');
+        container.classList.remove('border-success');
+        container.classList.add('border-danger');
+    }
     Highcharts.stockChart({
         chart: {
-            renderTo: 'graph1-temp'
+            renderTo: 'graph{{ serre.pk }}-temp',
+            borderWidth: 1
         },
 
         title: {
@@ -151,7 +157,7 @@
         series: [{
             name: 'Température',
             color: '#5b9bd5',
-            data: serre[0]['data'],
+            data: serre{{ serre.pk }}[0]['data'],
             label: {
                 enabled: false
             }
@@ -193,7 +199,8 @@
     });
     Highcharts.stockChart({
         chart: {
-            renderTo: 'graph1-hygro'
+            renderTo: 'graph{{ serre.pk }}-hygro',
+            borderWidth: 1
         },
 
         title: {
@@ -244,19 +251,19 @@
             pointFormat: '<tr><td style="color: {series.color}">{series.name} </td>' +
                          '<td style="text-align: right"><b>{point.y:.1f} %</b></td></tr>',
             footerFormat: '</table>',
-            crosshairs: [true]
+            crosshairs: [true],
         },
         series: [{
             name: "Hygrométrie air",
             color: '#67d55b',
-            data: serre[1]['data'],
+            data: serre{{ serre.pk }}[1]['data'],
             label: {
                 enabled: false
             }
         },{
             name: "Hygrométrie sol",
             color: '#375ee7',
-            data: serre[2]['data'],
+            data: serre{{ serre.pk }}[2]['data'],
             label: {
                 enabled: false
             }
@@ -299,7 +306,8 @@
     });
     Highcharts.stockChart({
         chart: {
-            renderTo: 'graph1-lumino'
+            renderTo: 'graph{{ serre.pk }}-lumino',
+            borderWidth: 1
         },
 
         title: {
@@ -355,7 +363,7 @@
         series: [{
             name: 'Luminosité',
             color: '#f84d12',
-            data: serre[3]['data'],
+            data: serre{{ serre.pk }}[3]['data'],
             label: {
                 enabled: false
             }
@@ -397,7 +405,8 @@
     });
     Highcharts.stockChart({
         chart: {
-            renderTo: 'graph1-pres'
+            renderTo: 'graph{{ serre.pk }}-pres',
+            borderWidth: 1
         },
 
         title: {
@@ -453,7 +462,7 @@
         series: [{
             name: 'Pression',
             color: '#11ee5f',
-            data: serre[4]['data'],
+            data: serre{{ serre.pk }}[4]['data'],
             label: {
                 enabled: false
             }
@@ -493,5 +502,6 @@
             ]
         }
     });
+    {% endfor %}
 
 {% endblock %}
