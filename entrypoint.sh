@@ -7,7 +7,7 @@ python manage.py makemigrations
 python manage.py makemigrations Serre
 
 python manage.py migrate
-python mange.py migrate Serre
+python manage.py migrate Serre
 
 mv /tmp/apps.py Serre/apps.py
 
