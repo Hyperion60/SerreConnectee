@@ -46,7 +46,6 @@
 <script src="/static/serre/js/boost.js"></script>
 <script src="/static/serre/js/data.js"></script>
 <script src="/static/serre/js/exporting.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script>
     Highcharts.setOptions({
         lang: {
@@ -85,7 +84,6 @@
         parentButton.childNodes.forEach(updateActive.bind(null, pk));
         button.classList.add('active');
         const number = button.attributes.id.nodeValue;
-        console.log("button(id): " + number);
         let graph = document.getElementById("graph".concat(pk, "-", number.slice(0, -1)));
         graph.style.display = null;
     }
