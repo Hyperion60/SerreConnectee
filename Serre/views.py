@@ -351,7 +351,7 @@ def lora_releve(request):
     # Check duplicata between wifi and lora
     list_releve = Releves.objects.filter(serre=context['serre']).order_by('-timestamp')
     now = datetime.datetime.now(pytz.timezone(TIME_ZONE)) + datetime.timedelta(hours=1)
-    if (list_releve[0].timestamp - now).total_seconds() <= 60:
+    if (now - list_releve[0].timestamp).total_seconds() <= 60:
         return HttpResponse("Relevé reçu")
 
     new_releve = Releves(
@@ -384,7 +384,7 @@ def wifi_releve(request):
         # Check duplicata between wifi and lora
         list_releve = Releves.objects.filter(serre=context['serre']).order_by('-timestamp')
         now = datetime.datetime.now(pytz.timezone(TIME_ZONE)) + datetime.timedelta(hours=1)
-        if not len(list_releve) or (list_releve[0].timestamp - now).total_seconds() > 60:
+        if not len(list_releve) or (now - list_releve[0].timestamp).total_seconds() > 60:
             new_releve = Releves(
                 serre=context['serre'],
                 temperature=float(data[0]),
