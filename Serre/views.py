@@ -389,7 +389,7 @@ def wifi_releve(request):
                 serre=context['serre'],
                 temperature=float(data[0]),
                 air_humidity=float(data[1]),
-                sol_humidity=(int(data[2]) * 100) / 256,
+                sol_humidity=(int(data[2]) * 100) / 1023,
                 pression=int(data[3]),
                 luminosite=int(data[4]),
                 timestamp=datetime.datetime.now(pytz.timezone(TIME_ZONE)) + datetime.timedelta(hours=1),
