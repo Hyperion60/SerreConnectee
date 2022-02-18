@@ -21,7 +21,7 @@
                     <h2 style="text-align: center">{{ serre.name }}</h2>
                 </div>
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-md-4">
                         <div class="list-group">
                             <a id="temp{{ serre.pk }}" class="list-group-item list-group-item-action active"aria-current="true" onclick="changeChart(this, {{ serre.pk }})">Température</a>
                             <a id="hygro{{ serre.pk }}" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this, {{ serre.pk }})">Humidité</a>
@@ -29,10 +29,10 @@
                             <a id="pres{{ serre.pk }}" class="list-group-item list-group-item-action" aria-current="true" onclick="changeChart(this, {{ serre.pk }})">Pression</a>
                         </div>
                     </div>
-                    <div class="col-8 graph{{ serre.pk }}-temp" id="graph{{ serre.pk }}-temp" style="min-height: 60vh; display: null;"></div>
-                    <div class="col-8 graph{{ serre.pk }}-hygro" id="graph{{ serre.pk }}-hygro" style="min-height: 60vh; display: none;"></div>
-                    <div class="col-8 graph{{ serre.pk }}-lumino" id="graph{{ serre.pk }}-lumino" style="min-height: 60vh; display: none"></div>
-                    <div class="col-8 graph{{ serre.pk }}-pres" id="graph{{ serre.pk }}-pres" style="min-height: 60vh; display: none;"></div>
+                    <div class="col-md-8 graph{{ serre.pk }}-temp" id="graph{{ serre.pk }}-temp" style="min-height: 60vh; display: null;"></div>
+                    <div class="col-md-8 graph{{ serre.pk }}-hygro" id="graph{{ serre.pk }}-hygro" style="min-height: 60vh; display: none;"></div>
+                    <div class="col-md-8 graph{{ serre.pk }}-lumino" id="graph{{ serre.pk }}-lumino" style="min-height: 60vh; display: none"></div>
+                    <div class="col-md-8 graph{{ serre.pk }}-pres" id="graph{{ serre.pk }}-pres" style="min-height: 60vh; display: none;"></div>
                 </div>
             </span>
         </div>
@@ -46,7 +46,27 @@
 <script src="/static/serre/js/boost.js"></script>
 <script src="/static/serre/js/data.js"></script>
 <script src="/static/serre/js/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script>
+    Highcharts.setOptions({
+        lang: {
+            months: [
+            'Janvier', 'Février', 'Mars', 'Avril',
+            'Mai', 'Juin', 'Juillet', 'Août',
+            'Septembre', 'Octobre', 'Novembre', 'Décembre'
+            ],
+            weekdays: [
+                'Dimanche', 'Lundi', 'Mardi', 'Mercredi',
+                'Jeudi', 'Vendredi', 'Samedi'
+            ],
+            shortMonths: [
+                'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin',
+                'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'
+            ],
+            noData: "Aucune Donnée"
+        }
+    })
+
     function updateActive(pk, element) {
         if (element.hasChildNodes()) {
             if (element.classList.contains('active')) {
@@ -107,17 +127,23 @@
         title: {
             text: 'Température'
         },
+        noData: {
+            style: {
+                fontWeight: 'bold',
+                fontSize: '15px',
+                color: '#696969'
+            }
+        },
 
         xAxis: {
             type: "datetime",
             title: {
                 text: "Temps"
             },
-            labels: {
-                formatter: function() {
-                    return Highcharts.dateFormat('%d/%m/%Y %H:%M', this.value);
-                }
-            }
+            dateTimeLabelFormat: {
+                month: '%e. %b',
+                year: '%b'
+            },
         },
         yAxis: {
             title: {
