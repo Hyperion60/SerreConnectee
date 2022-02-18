@@ -142,6 +142,9 @@ STATIC_ROOT = '/media/www/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CSRF_TRUSTED_ORIGINS = ['https://serre.hyperion.tf', 'https://serre.unilasalle-amiens.fr']
+
+CSRF_COOKIE_SECURE = True
 
 # Email settings
 
