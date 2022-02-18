@@ -73,7 +73,7 @@
     let xhttp = new XMLHttpRequest();
     function getSerre(pk, serre) {
         xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-        const address = "http://{{ request.get_host }}/serre/get/".concat(pk, "/");
+        const address = "/serre/get/".concat(pk, "/");
         const reqType = "GET";
 
         xhttp.open(reqType, address, false);
