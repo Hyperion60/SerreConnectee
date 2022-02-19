@@ -6,3 +6,4 @@ six == 1.16.*
 python-dotenv == 0.19.*
 pytz == 2021.*
 django_sendfile2 == 0.6.*
+django_crontab == 0.7.*

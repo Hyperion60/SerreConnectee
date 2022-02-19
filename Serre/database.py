@@ -1,10 +1,8 @@
 import datetime
-from background_task import background
 
 from Serre.models import Releves
 
 
-@background(schedule=60 * 60 * 24)
 def clean_database():
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     releves = Releves.objects.filter(timestamp__gt=now + datetime.timedelta(days=7))

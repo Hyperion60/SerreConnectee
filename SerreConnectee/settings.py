@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'background_task',
+    'django_crontab',
     'Serre',
     'SerreConnectee',
 ]
@@ -160,3 +160,10 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASS_OVH")
 EMAIL_PORT = os.getenv("EMAIL_PORT_OVH")
 
 EMAIL_USE_SSL = bool(int(os.getenv("EMAIL_SSL_OVH")))
+
+
+# Cronjobs
+
+CRONJOBS = [
+    ('0 0 * * *', 'Serre.database.clean_database'),
+]
