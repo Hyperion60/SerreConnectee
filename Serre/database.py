@@ -19,6 +19,7 @@ def clean_database():
             sum_hygro_sol += two_weeks[i + j].sol_humidity
             sum_light += two_weeks[i + j].luminosite
             sum_pres += two_weeks[i + j].pression
+            print("Pression(pk={}): {}, sum={}".format(two_weeks[i + j].pk, two_weeks[i + j].pression, sum_pres))
             if j > 0:
                 two_weeks[i + j].delete()
             j += 1
@@ -31,9 +32,11 @@ def clean_database():
             two_weeks[i].sol_humidity = sum_hygro_sol / j
             two_weeks[i].luminosite = sum_light / j
             two_weeks[i].pression = sum_pres / j
+            print("Total: {}/{} = {}".format(sum_pres, j, two_weeks[i].pression))
             two_weeks[i].save()
             i += j
-        i += 1
+        else:
+            i += 1
 
     old = Releves.objects.filter(timestamp__lt=now - datetime.timedelta(days=7))
     old_len = len(old)
@@ -48,6 +51,7 @@ def clean_database():
             sum_hygro_sol += old[i + j].sol_humidity
             sum_light += old[i + j].luminosite
             sum_pres += old[i + j].pression
+            print("Pression(pk={}): {}, sum={}".format(old[i + j].pk, old[i + j].pression, sum_pres))
             if i + j < old_len and j > 0:
                 old[i + j].delete()
             j += 1
@@ -60,9 +64,11 @@ def clean_database():
             old[i].sol_humidity = sum_hygro_sol / j
             old[i].luminosite = sum_light / j
             old[i].pression = sum_pres / j
+            print("Total: {}/{} = {}".format(sum_pres, j, old[i].pression))
             old[i].save()
             i += j
-        i += 1
+        else:
+            i += 1
 
     trash = Releves.objects.filter(timestamp__lt=now - datetime.timedelta(weeks=10))
     for releve in trash:
