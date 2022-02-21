@@ -14,8 +14,23 @@ services:
       - 6023
     networks:
       - upstream_net
+      - cache_net
     secrets:
       - email_password
+    depends_on:
+      - memcache
+
+  memcache:
+    container_name: memcache
+    image: memcached:1.6-alpine
+    ports:
+      - 11211
+    networks:
+      - cache_net
+    entrypoint:
+      - memcached
+      - -m 64
+
   nginx:
     container_name: nginx_static
     build: ./nginx
@@ -32,6 +47,8 @@ volumes:
   static_volume:
 
 networks:
+  cache_net:
+    driver: bridge
   upstream_net:
     driver: bridge
   default:

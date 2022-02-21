@@ -34,6 +34,9 @@ class Serre(models.Model):
     NetworkSKey = models.CharField(default=None, max_length=250, null=True)
     AppSKey = models.CharField(default=None, max_length=250, null=True)
 
+    # Clean database
+    last_clean = models.DateTimeField(default=None, null=True)
+
     user = models.ForeignKey(User, models.CASCADE, default=None)
 
 

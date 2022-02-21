@@ -96,6 +96,17 @@ DATABASES = {
 }
 
 
+# Infra Cache
+
+if os.getenv("PRODUCTION"):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+            'LOCATION': 'memcache:11211',
+        }
+    }
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -159,3 +170,10 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASS_OVH")
 EMAIL_PORT = os.getenv("EMAIL_PORT_OVH")
 
 EMAIL_USE_SSL = bool(int(os.getenv("EMAIL_SSL_OVH")))
+
+
+# Cronjobs
+
+CRONJOBS = [
+    ('0 0 * * *', 'Serre.database.clean_database'),
+]
