@@ -5,6 +5,7 @@ import os
 import time
 from django.http import JsonResponse, HttpResponse
 from django_sendfile import sendfile
+from django.views.decorators.cache import cache_page
 
 import Serre.views
 from Serre.database import clean_database
@@ -102,6 +103,7 @@ def create_json(serre):
     return releves
 
 
+@cache_page(5 * 60)
 def get_releve(request, pk):
     context = {}
     try:
