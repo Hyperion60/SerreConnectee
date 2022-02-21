@@ -7,6 +7,7 @@ from django.http import JsonResponse, HttpResponse
 from django_sendfile import sendfile
 
 import Serre.views
+from Serre.database import clean_database
 from SerreConnectee.settings import STATIC_ROOT
 from Serre.models import Releves, Serre
 
@@ -83,6 +84,12 @@ def create_json(serre):
             'data': [],
         }
     ]
+
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    if not serre.last_clean or (now - serre.last_clean).total_seconds() > 60 * 60 * 24:
+        clean_database()
+        serre.last_clean = now
+        serre.save()
 
     for releve in Releves.objects.filter(serre__pk=serre.pk).order_by('timestamp'):
         ts = __getUTCJS__(releve.timestamp)
