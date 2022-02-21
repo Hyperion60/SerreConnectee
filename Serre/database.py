@@ -63,3 +63,7 @@ def clean_database():
             old[i].save()
             i += j
         i += 1
+
+    trash = Releves.objects.filter(timestamp__lt=now - datetime.timedelta(weeks=10))
+    for releve in trash:
+        releve.delete()
