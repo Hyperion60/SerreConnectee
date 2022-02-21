@@ -73,7 +73,6 @@ def about(request):
     return render(request, "about.html")
 
 
-@cache_page(5 * 60)
 def index(request):
     context = {}
     if request.GET.get('code', '') == '1':
