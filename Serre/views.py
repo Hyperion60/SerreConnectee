@@ -343,7 +343,7 @@ def lora_releve(request):
     debut = False
     for ele in context['json']['uplink_message']['decoded_payload']['brut']:
         if ele == ord('#'):
-            debut = True
+            debut = not debut
         if ele and debut and ele != ord('#'):
             context['str'] += chr(ele)
     context['list'] = context['str'].split(',')

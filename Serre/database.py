@@ -73,3 +73,9 @@ def clean_database():
     trash = Releves.objects.filter(timestamp__lt=now - datetime.timedelta(weeks=10))
     for releve in trash:
         releve.delete()
+
+
+def clean_invalid():
+    for releve in Releves.objects.all():
+        if releve.luminosite > 65536 or releve.sol_humidity > 100 or releve.air_humidity > 100:
+            releve.delete()
