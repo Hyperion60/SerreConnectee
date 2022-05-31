@@ -19,6 +19,7 @@ services:
       - email_password
     depends_on:
       - memcache
+    restart: always
 
   memcache:
     container_name: memcache
@@ -30,6 +31,7 @@ services:
     entrypoint:
       - memcached
       - -m 64
+    restart: always
 
   nginx:
     container_name: nginx_static
@@ -42,6 +44,7 @@ services:
       - upstream_net
     depends_on:
       - django
+    restart: always
 
 volumes:
   static_volume:
